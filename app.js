@@ -17,6 +17,7 @@ mongoose.connect(uri)
 
 let app=express()
 app.set("view engine","ejs")//Setting the engine extension  
+app.use(express.static("public/"))
 app.use(bodyParser.urlencoded({extended:true}))
 //Create a session storage encrypted with the secret
 app.use(require("express-session")({

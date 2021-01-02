@@ -1,0 +1,14 @@
+body{
+    border:1px solid black;
+    height:100%;
+}
+.container{
+    height:600px;
+    display:flex;
+    align-items:center; 
+    box-shadow:0 2px 4px rgba(0,0,0,0.4);
+    width:60%;
+}
+.left{
+
+}
