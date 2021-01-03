@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<div class="container">
+    <h2>Add Course</h2>
+    <form action="/createCourse" method="POST">
+      <div class="form-group">
+        <label for="name">Course Name: </label>
+        <input type="text" class="form-control" id="cid" placeholder="Enter Course name" name="Cname">
+      </div>
+      <div class="form-group">
+        <label for="desc">Course Description:</label>
+        <input type="text" class="form-control" id="pwd" placeholder="Enter Course Discription" name="discription">
+      </div>
+      <button class="btn btn-default">ADD</button>
+    </form>
+  </div>
