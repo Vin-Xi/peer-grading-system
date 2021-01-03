@@ -1,14 +1,33 @@
 body{
-    border:1px solid black;
+
     height:100%;
 }
-.container{
-    height:600px;
-    display:flex;
-    align-items:center; 
-    box-shadow:0 2px 4px rgba(0,0,0,0.4);
-    width:60%;
-}
-.left{
+.border{
+    border:2px solid black;
 
+}
+.signup{
+    position:absolute;
+    top:100px;
+    margin:20px;
+    padding:30px;
+
+}
+.login{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    height:600px;
+}
+.login-header{
+    padding:5px;
+    box-shadow: 1px 1px 5px lightsteelblue;
+    border-radius:5%;
+    text-align: center;
+}
+.title-signup{
+    margin-bottom:100px;
+}
+a{
+    text-decoration: none;
 }
