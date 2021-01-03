@@ -1,15 +1,42 @@
-<h1>login</h1> 
-  
-<form action="/login" method="POST"> 
-    <input type="text" name="username"
-        placeholder="username"> 
-    <input type="password" name="password" 
-        placeholder="password"> 
-    <button>login</button> 
-</form> 
-  
-<h1>This is home page</h1> 
-  
-<li><a href="/register">Sign up!!</a></li> 
-<li><a href="/login">Login</a></li> 
-<li><a href="/logout">Logout</a></li> 
+<!DOCTYPE html>
+<head>
+    <title>Lorem Ipsum</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" 
+    crossorigin="anonymous">
+    <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" 
+    crossorigin="anonymous">
+    </script>
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="functionality/functionality.js"></script>
+</head> 
+
+<body class="border">
+    
+   <div class="container border login">
+     
+        <div>
+            <h4 class="login-header ">Login</h4> 
+            <form action="/login" method="POST">
+                
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" class="form-control" 
+                    placeholder="Username"> 
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" class="form-control"
+                    placeholder="Password"> 
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Login</button> 
+            </form>     
+        </div>
+    </div>
+  </body>
