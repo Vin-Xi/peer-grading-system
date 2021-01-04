@@ -5,7 +5,9 @@ const express=require("express"),
     LocalStrategy=require("passport-local"),
     passportLocalMongoose=require("passport-local-mongoose"),
     User=require("./models/user")
-    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+    Course=require("./models/course")
+    Enroll=require("./models/enrollcourse")
+    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";
 
 
 //-------------------------Database Configuration-----------------------
@@ -84,7 +86,7 @@ app.post("/register",function(req,res){
         }
         passport.authenticate("local")(
             req,res,function(){
-                res.render("secret")
+                res.render("login")
             })
         
     })
@@ -94,33 +96,67 @@ app.get("/login",function(req,res){
     res.render("login")
 })
 
-app.post("/login",
-    passport.authenticate("local"),
-    function(req,res){
-        console.log(req.user.username)
-        res.render("secret",{"username":req.user.username})
-    })
+app.post("/login",passport.authenticate("local"),function(req,res){
+    var username = req.user.username;
+    //check whether user is student or teacher
+    getProfileData(username,function(profile){
+        if(profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username,function(courses){
+                console.log("its a teacher");
+                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+            }) 
+        }
+        else {
+            //get students enrolled courses
+            console.log("student");
+            getUserCourses(username,function(courses) {
+                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            })
+        }
+    }) 
+})
 
 app.get("/logout",function(req,res){
     req.logout()
     res.redirect("/")
 })
 
-
 app.get("/createCourse",function(req,res){
-    res.render("createCourse")
+    res.render("createCourse", {"username" : req.user.username})
 })
+
 // Adding into database
 app.post("/createCourse",async (req,res) =>{
     try {
-        const CourseName=req.body.Cname;
-        const Discription=req.body.discription;
+        const coursename=req.body.Cname;
+        const description=req.body.description;
+        const username=req.user.username;
         const check1 = new Course({
-            CourseName:CourseName,
-            Discription:Discription
+            username:username,
+            coursename:coursename,
+            description:description
         })
         const done = await check1.save();
-        res.status(400).render("secret");
+
+        //check whether user is student or teacher
+        getProfileData(username,function(profile){
+            if(profile[0].status == 'Teacher') {
+                //get teachers own courses
+                getTeacherCourses(username,function(courses){
+                    console.log("its a teacher");
+                    console.log(courses);
+                    res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+                }) 
+            }
+            else {
+                //get students enrolled courses
+                console.log("student");
+                getUserCourses(username,function(courses) {
+                    res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+                })
+            }
+        }) 
     } catch (error) {
        console.log(error)
     }
@@ -145,8 +181,111 @@ app.listen(port, function(){
     console.log("Server has started!")
 })
 
+//----------------UMEHANI CODE------------------------------
+const moment = require('moment');
 
+app.get("/dashboard",function(req,res){
+    var username = req.user.username;
+    //check whether user is student or teacher
+    getProfileData(username,function(profile){
+        if(profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username,function(courses){
+                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+            }) 
+        }
+        else {
+            //get students enrolled courses
+            getUserCourses(username,function(courses) {
+                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            })
+        }
+    }) 
+})
 
+app.post("/dashboard",function(req,res){
+    var username = username;
+    //check whether user is student or teacher
+    getProfileData(username,function(profile){
+        if(profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username,function(courses){
+                console.log("its a teacher");
+                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+            }) 
+        }
+        else {
+            //get students enrolled courses
+            console.log("student");
+            getUserCourses(username,function(courses) {
+                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            })
+        }
+    }) 
+})
 
+//request to load profile page
+app.get("/profile",isLoggedIn,function(req,res){
+    console.log(req.user.username);
+    getProfileData(req.user.username, function(data){
+        res.render("profile", {"data" : data})
+    })
+})
 
- 
+//updating profile
+app.post("/profile",isLoggedIn,function(req,res){
+    var username=req.body.username
+    var firstname=req.body.firstname
+    var lastname=req.body.lastname
+    var email=req.body.email
+    var date=req.body.date
+    var myquery = {username: username};
+    var newvalues = { $set: {firstname:firstname, lastname:lastname, email:email, date:date}};
+    User.updateOne(myquery,newvalues,function(err,user) {
+        if(err) throw err;
+        getProfileData(username,function(data){
+            data.date = moment(data.date).utc().format("YYYY-MM-DD")
+            console.log(data.date);
+            res.render("profile", {"data" : data}) 
+        })
+    })
+})
+
+//get userdata based on username
+function getProfileData(username,callback){
+    const query = { username: username};
+    User.find(query,function(err, db){
+        if(err) console.log(err);
+        console.log(db);
+        return callback(db)
+    })        
+}
+
+//get courses based on studentname
+function getUserCourses(username,callback){
+    const query = {username: username};
+    Enroll.find(query,function(err, db){
+        if(err) console.log(err);
+        return callback(db)
+    })        
+}
+
+//get courses based on teachername
+function getTeacherCourses(username,callback){
+    const query = {username: username};
+    Course.find(query,function(err, db){
+        if(err) console.log(err);
+        return callback(db)
+    })        
+}
+
+//get courses not for this user
+//function exploreCourses(callback){
+//  const query = {coursename:coursename}
+//Course.find(function(err,db){
+//  if (err) console.log(err);
+//  return callback(db);
+//   })
+//}
+
+  
