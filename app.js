@@ -7,7 +7,7 @@ const express=require("express"),
     User=require("./models/user")
     Course=require("./models/course")
     Enroll=require("./models/enrollcourse")
-    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";
+    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
 
 
 //-------------------------Database Configuration-----------------------
@@ -68,10 +68,11 @@ app.post("/register",function(req,res){
     let firstname=req.body.firstname
     let lastname=req.body.lastname
     let email=req.body.email
-    let date=req.body.dateofbirth
+    let date=req.body.date
     let username=req.body.username
     let password=req.body.password
     let status=req.body.status
+    console.log(status+" "+date)
     User.register(new User({
         firstname:firstname,
         lastname:lastname,
