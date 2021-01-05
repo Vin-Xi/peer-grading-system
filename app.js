@@ -7,8 +7,11 @@ const express=require("express"),
     User=require("./models/user")
     Course=require("./models/course")
     Enroll=require("./models/enrollcourse")
+    Assignment=require("./models/assignment")
     const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-
+    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
+    //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
 //-------------------------Database Configuration-----------------------
 mongoose.set('useNewUrlParser',true)
@@ -181,6 +184,88 @@ let port=process.env.PORT || 3000
 app.listen(port, function(){
     console.log("Server has started!")
 })
+
+//-----------------ADDED BY MAIRA----------------------
+
+
+var multer = require('multer');
+var path = require('path');
+var fs = require('fs');
+var docStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+     cb(null, 'uploads/docs');
+        },
+     filename: function (req, file, cb) {
+        var originalname = file.originalname;
+        var extension = originalname.split(".");
+        //filename= originalname;
+        filename = Date.now() + '.' + extension[extension.length-1]; 
+        cb(null, filename);
+      }
+    });
+
+
+app.get("/add-assignment",function(req,res){
+    res.render("add-assignment");
+ })
+
+
+// takes data from Add assignment form and adds object to database
+ app.post(
+   "/add-assignment",
+   multer({ storage: docStorage, dest: "uploads/docs" }).single("file"),
+   function (req, res) {
+     console.log(req.body);
+
+     var questions = [];
+     var filepath = "";
+
+     if ((req.body.type == "mcq")) {
+       for (let index = 0; index < req.body.mcqs; index++) {
+         var optionName = "option" + index;
+         var ques = {
+           text: req.body.question[index],
+           answer: req.body.answer[index],
+           marks: req.body.quesMarks[index],
+           options: req.body[optionName],
+         };
+         questions.push(ques);
+       }
+     } else if ((req.body.type == "doc")) {
+       filepath = req.file.path;
+     }
+     console.log("Questions object: " + questions);
+     try {
+       const assignment = new Assignment({
+         title: req.body.title,
+         description: req.body.desc,
+         dueDate: req.body.duedate,
+         totalMarks: req.body.marks,
+         grading: req.body.grading,
+         type: req.body.type,
+         filePath: filepath,
+         //courseID: {type:ObjectId,required:true,unique:false},
+         attemptedBy: [],
+         questions: questions,
+       });
+       const done = assignment.save();
+      
+       res.render("home");
+     } catch (err) {
+       console.log("Error POST add-assignment: " + err);
+     }
+   }
+ );
+
+
+ //-------------------END OF SECTION ADDED BY MAIRA----------------------------
+
+
+
+
+
+
+
 
 //----------------UMEHANI CODE------------------------------
 const moment = require('moment');
