@@ -363,7 +363,7 @@ app.post("/assignment-student", multer({
     //MCQ Answers 
     else if (req.body.reqType == 'mcq') {
         var id = "5ff4c931c04e48114d3ea898"; //PENDING 
-        const filter = {
+        var filter = {
             _id: id
         }
 
@@ -382,50 +382,66 @@ app.post("/assignment-student", multer({
             }
             answers.push(x)
         }
+        var update;
         //calculate Marks
-        calculateMarks(answers,id);
-        console.log(answers)
-        var update = {
+        try{
+     getAssignmentData(id, function (assignment) {
+         var marks= calculateMarks(answers,assignment);
+         update = {
             // "$push":{
             attemptedBy: {
                 student: "5ff46e865bf6ee2e810522fb", //PENDING: REPLACE BY PASSED VALUE
                 answers: answers,
-                marked: false
+                marked: true,
+                marks:marks
             }
         }
-        //}
-        //PUSHING IN DATABASE
-        // Assignment.updateOne(filter, update, function (
-        //     err,
-        //     result
-        // ) {
-        //     if (err) {
-        //         console.log("Error: " + err)
-        //     } else {
-        //         console.log("Successfully inserted")
-        //     }
-        // })
-    }
-    // }
+        Assignment.updateOne(filter, update, function (
+            err,
+            result
+        ) {
+            if (err) {
+                console.log("Error: " + err)
+            } else {
+                console.log("Successfully inserted")
+            }
+        })
+        
+        })}catch(err){
+            console.log("err"+err)
+        }
+        console.log(answers)
+   
+        }
+   
     res.render("home")
 })
 
-function calculateMarks(answers,id){
+function calculateMarks(answers,assignment){
     var marks=0;
     console.log("Answers in function "+answers)
-    try{
+    console.log("Answers len "+answers.length)
+   
+            console.log("Assignment object: "+ assignment[0].questions)
 
-        getAssignmentData(id, function (assignment) {
-            for (let i = 0; i < assignment.questions.length; i++) {
-                const element = array[i];
+            for (let i = 0; i < answers.length; i++) {
+                var quesID=answers[i].question;
+                //look for this id in assignment
+                for (var x=0; x < assignment[0].questions.length; x++) {
+
+                    if (assignment[0].questions[x]._id == quesID) {
+                        console.log("in if")
+                        //compare answers
+                        if(assignment[0].questions[x].answer==answers[i].answer){
+                            marks=marks+assignment[0].questions[x].marks;
+                            console.log("Correct!"+marks)
+                        }
+                    }
+                }
                 
             }
-            
-        })
-    }catch(err){
-        console.log("Error in calc marks :" + err)
-    }
-    return marks;
+  
+        return marks;
 }
 //-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
@@ -433,6 +449,7 @@ function calculateMarks(answers,id){
 
 //----------------UMEHANI CODE------------------------------
 const moment = require('moment');
+const assignment = require("./models/assignment");
 
 app.get("/dashboard", function (req, res) {
     var username = req.user.username;
