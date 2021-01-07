@@ -241,10 +241,10 @@ app.post(
         dest: "uploads/docs"
     }).single("file"),
     function (req, res) {
-        console.log(req.body);
+        //  console.log(req.body);
 
         var questions = [];
-        var filepath = "";
+        var fileName = "";
         var markingScheme;
         if ((req.body.type == "mcq")) {
             for (let index = 0; index < req.body.mcqs; index++) {
@@ -258,28 +258,31 @@ app.post(
                 questions.push(ques);
             }
         } else if ((req.body.type == "doc")) {
-            filepath = req.file.path;
+            //filepath = req.file.path;
+            fileName = req.file.filename;
+            console.log("file name ----> " + fileName)
             if (req.body.grading == 'peer') {
                 markingScheme = req.body.criteria;
                 console.log("crit: " + req.body.criteria)
                 console.log("marking: " + markingScheme)
             }
         }
-        console.log("Questions object: " + questions);
+        //  console.log("Questions object: " + questions);
         try {
-            const assignment = new Assignment({
+            var assignment = new Assignment({
                 title: req.body.title,
                 description: req.body.desc,
                 dueDate: req.body.duedate,
                 totalMarks: req.body.marks,
                 grading: req.body.grading,
                 type: req.body.type,
-                filePath: filepath,
-                //courseID: {type:ObjectId,required:true,unique:false},
+                fileName: req.file.filename,
+                //courseID: {type:ObjectId,required:true,unique:false}, PENDING
                 attemptedBy: [],
                 questions: questions,
                 markingScheme: markingScheme
             });
+            console.log("Assignment--> " + assignment)
             const done = assignment.save();
 
             res.render("home");
@@ -290,8 +293,8 @@ app.post(
 );
 
 app.get("/assignment-student", function (req, res) {
-    // var id= "5ff48d1f570efc2ce1c6c110"; //for doc assignment
-    var id = "5ff4c931c04e48114d3ea898"; //for mcq assignment
+   // var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
+       var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
     try {
         getAssignmentData(id, function (assignment) {
             console.log("assignment received: " + assignment)
@@ -306,32 +309,25 @@ app.get("/assignment-student", function (req, res) {
     }
 })
 
+app.get("/assignment-student/:filename", function (req, res) {
+    console.log("downloading assignment for student")
+    const dir = __dirname + "/uploads/docs/"
+    const filename = req.params.filename
+    res.download(dir + filename)
+
+
+})
 
 app.post("/assignment-student", multer({
     storage: docStorage,
     dest: "uploads/docs"
 }).single("file"), function (req, res) {
-    //  CODE TO DOWNLOAD FILE
-    if (req.body.reqType == 'download') {
 
-        var file = req.body.filePath;
-        var extension = file.split(".");
-        var filename = req.body.fileName + '.' + extension[extension.length - 1];
-
-        res.download(file, filename, function (err) {
-            if (err) {
-                console.log("Error");
-                console.log(err);
-            } else {
-                console.log("Success");
-            }
-        });
-    }
 
     //Code to upload submission
-    else if (req.body.reqType == 'upload') {
-        var filepath = req.file.path;
-        var id = "5ff48d1f570efc2ce1c6c110";
+    if (req.body.reqType == 'upload') {
+        var fileName = req.file.filename;
+        var id = "5ff73386b8778b2108e03d41"; //PENDING DOC ASSIGNMENT
         const filter = {
             _id: id
         }
@@ -339,15 +335,15 @@ app.post("/assignment-student", multer({
         var update = {
             "$push": {
                 attemptedBy: {
-                    student: "5ff46e865bf6ee2e810522fb",
-                    filePath: filepath,
+                    student: "5ff727a49a622346e00cc377", //PENDING
+                    fileName: fileName,
                     marked: false
                 }
 
             }
         }
 
-        console.log("Upload file: " + filepath)
+        console.log("Upload file: " + fileName)
         //update code to push elements in array
         Assignment.updateOne(filter, update, function (
             err,
@@ -362,7 +358,7 @@ app.post("/assignment-student", multer({
     }
     //MCQ Answers 
     else if (req.body.reqType == 'mcq') {
-        var id = "5ff4c931c04e48114d3ea898"; //PENDING 
+        var id = "5ff72840b5a3d13408f49f94"; //PENDING --mcq assignment id
         var filter = {
             _id: id
         }
@@ -384,65 +380,114 @@ app.post("/assignment-student", multer({
         }
         var update;
         //calculate Marks
-        try{
-     getAssignmentData(id, function (assignment) {
-         var marks= calculateMarks(answers,assignment);
-         update = {
-            // "$push":{
-            attemptedBy: {
-                student: "5ff46e865bf6ee2e810522fb", //PENDING: REPLACE BY PASSED VALUE
-                answers: answers,
-                marked: true,
-                marks:marks
-            }
-        }
-        Assignment.updateOne(filter, update, function (
-            err,
-            result
-        ) {
-            if (err) {
-                console.log("Error: " + err)
-            } else {
-                console.log("Successfully inserted")
-            }
-        })
-        
-        })}catch(err){
-            console.log("err"+err)
+        try {
+            getAssignmentData(id, function (assignment) {
+                var marks = calculateMarks(answers, assignment);
+                update = {
+                    // "$push":{
+                    attemptedBy: {
+                        student: "5ff727a49a622346e00cc377", //PENDING: REPLACE BY PASSED VALUE
+                        answers: answers,
+                        marked: true,
+                        marks: marks
+                    }
+                }
+                Assignment.updateOne(filter, update, function (
+                    err,
+                    result
+                ) {
+                    if (err) {
+                        console.log("Error: " + err)
+                    } else {
+                        console.log("Successfully inserted")
+                    }
+                })
+
+            })
+        } catch (err) {
+            console.log("err" + err)
         }
         console.log(answers)
-   
-        }
-   
+
+    }
+
     res.render("home")
 })
 
-function calculateMarks(answers,assignment){
-    var marks=0;
-    console.log("Answers in function "+answers)
-    console.log("Answers len "+answers.length)
-   
-            console.log("Assignment object: "+ assignment[0].questions)
+app.get("/assignment-teacher", function (req, res) {
 
-            for (let i = 0; i < answers.length; i++) {
-                var quesID=answers[i].question;
-                //look for this id in assignment
-                for (var x=0; x < assignment[0].questions.length; x++) {
 
-                    if (assignment[0].questions[x]._id == quesID) {
-                        console.log("in if")
-                        //compare answers
-                        if(assignment[0].questions[x].answer==answers[i].answer){
-                            marks=marks+assignment[0].questions[x].marks;
-                            console.log("Correct!"+marks)
-                        }
-                    }
+    //var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
+    var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
+    var students = [{
+            "5ff727889a622346e00cc376": "Maira Tariq"
+        },
+        {
+            "5ff727a49a622346e00cc377": "Um E Hani"
+        }
+    ]
+    //PENDING: Get assignment using ID, loop through attemptedBy and get Names of students -- pass assignment and names 
+    try {
+        getAssignmentData(id, function (assignment) {
+            console.log("assignment received: " + assignment)
+            res.render("assignment-teacher", {
+                data: assignment,
+                students: students
+            });
+
+
+        })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.get("/assignment-teacher/:filename", function (req, res, next) {
+    console.log("HERE")
+    const dir = __dirname + "/uploads/docs/"
+    const filename = req.params.filename
+    res.download(dir + filename)
+
+})
+
+app.get("/mcq-answers/:attempt", function (req, res,next) {
+    const data= req.params.attempt;
+    console.log("getting mcq answers----->"+data)
+    
+
+
+})
+
+
+
+function calculateMarks(answers, assignment) {
+    var marks = 0;
+    console.log("Answers in function " + answers)
+    console.log("Answers len " + answers.length)
+
+    console.log("Assignment object: " + assignment[0].questions)
+
+    for (let i = 0; i < answers.length; i++) {
+        var quesID = answers[i].question;
+        //look for this id in assignment
+        for (var x = 0; x < assignment[0].questions.length; x++) {
+
+            if (assignment[0].questions[x]._id == quesID) {
+                console.log("in if")
+                //compare answers
+                if (assignment[0].questions[x].answer == answers[i].answer) {
+                    marks = marks + assignment[0].questions[x].marks;
+                    console.log("Correct!" + marks)
                 }
-                
             }
-  
-        return marks;
+        }
+
+    }
+
+    return marks;
 }
+
+
 //-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
 

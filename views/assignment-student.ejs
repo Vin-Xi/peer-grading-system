@@ -7,7 +7,16 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    <script>
+        //CHECK TAB FOCUS ------- CHEATING PAKRNAY KAY LIYE HUEHUE
+        $(document).ready(function(){
+        document.addEventListener("visibilitychange", function() {
+            var d= new Date();
+     document.hidden ? console.log("Switched to other window at "+d.toLocaleTimeString()) : console.log("Returned at "+d.toLocaleTimeString());
+     
+        });
+        });
+    </script>
 
 </head>
 
@@ -21,7 +30,7 @@
             </div>
 
             <!--ASSIGNMENT INFO PORTION-->
-            <%
+            <%      
      var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
      var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
      var due=days[data[0].dueDate.getDay()]+", "+ data[0].dueDate.getDate()+" " + months[data[0].dueDate.getMonth()] +" "+ data[0].dueDate.getFullYear() ;
@@ -47,15 +56,17 @@
 
                 <!--If DOC assignment-->
                 <% if(data[0].type=='doc')
-                {   var link= data[0].filePath.replace('\\','/')
+                { 
+                      <!-- var link= data[0].filePath.replace('\\','/') -->
                     %>
                 <h3>Assignment</h3>
-                <form action="/assignment-student" method="POST">
+                <a href="http://localhost:3000/assignment-student/<%data[0].fileName%>">Download Assignment</a>
+                <!-- <form action="/assignment-student" method="POST">
                     <input type="hidden" name="reqType" value="download" />
                     <input type="hidden" name="filePath" value="<%=data[0].filePath%>" />
                     <input type="hidden" name="fileName" value="<%=data[0].title%>" />
                     <button>Download</button>
-                </form>
+                </form> -->
                 <!-- <h3>Download assignment here: <a href="uploads\docs\check.txt" download="sth.txt" >Download</a></h3> -->
                 <%}%>
                    
