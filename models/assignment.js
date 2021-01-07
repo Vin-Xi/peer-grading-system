@@ -9,12 +9,12 @@ var AssignmentSchema = new mongoose.Schema({
   totalMarks: {type:Number,required:true,unique:false},
   grading: {type:String,required:true,unique:false},
   type: {type:String,required:true,unique:false},
-  filePath: {type:String,required:false,unique:false},
+  fileName: {type:String,required:false,unique:false},
   markingScheme:[{type:String,required:false,unique:false}],
   courseID: {type:ObjectId,required:false,unique:false}, //PENDING--CHANGE TO TRUE
   attemptedBy: [{
     student:{type:ObjectId,required:false,unique:false},
-    filePath:{type:String,required:false,unique:false},
+    fileName:{type:String,required:false,unique:false},
     marks: {type:Number,required:true,unique:false},
     marked:{type:Boolean,required:true,unique:false},
     answers: [{
