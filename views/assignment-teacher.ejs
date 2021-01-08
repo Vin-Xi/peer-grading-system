@@ -186,10 +186,10 @@ h2{
                     <%if(data[0].type=='mcq'){%>
                     <td> <a href="http://localhost:3000/mcq-answers/<%attempt%>" target="_blank">View MCQs Answers</a></td> <!--link to mcq assignment-->
                     <%} %> 
-                    <%if(attempt.marked==true){%>
-                    <td><%attempt.marks%></td> <!--marks if marked-->
+                    <%if(attempt.marked===true){%>
+                    <td><%=attempt.marks%></td> <!--marks if marked-->
                     <%} %> 
-                    <%if(attempt.marked==false){%>
+                    <%if(attempt.marked===false){%>
                     <td>-</td> <!--input value if not marked-->
                     <%} %> 
                    
