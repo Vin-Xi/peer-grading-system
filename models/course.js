@@ -3,10 +3,10 @@ var passportLocalMongoose = require('passport-local-mongoose');
 
 var CourseSchema = new mongoose.Schema({
   username: {type:String,required:true,unique:false},
-  CourseName: {type:String,required:true,unique:true},
-  Discription: {type:String,required:true}
-})
+  coursename: {type:String,required:true,unique:true},
+  description: {type:String,required:true}
+},{collection:"course"});
 
 // creating collection
-const course= new mongoose.model("course",CourseSchema);
+const course= new mongoose.model("Course",CourseSchema);
 module.exports = course;

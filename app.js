@@ -4,14 +4,14 @@ const express=require("express"),
     bodyParser=require("body-parser"),
     LocalStrategy=require("passport-local"),
     passportLocalMongoose=require("passport-local-mongoose"),
-
-    //Adding objects of collections
     User=require("./models/user")
     Course=require("./models/course")
-    Enroll=require("./models/enrollCourses")
-
-    const uri = "mongodb://maha:maharana@cluster0-shard-00-00.x89gb.mongodb.net:27017,cluster0-shard-00-01.x89gb.mongodb.net:27017,cluster0-shard-00-02.x89gb.mongodb.net:27017/peerGrading?ssl=true&replicaSet=atlas-vn0dri-shard-0&authSource=admin&retryWrites=true&w=majority";
-    
+    Enroll=require("./models/enrollcourse")
+    Assignment=require("./models/assignment")
+    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
+    //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
 //-------------------------Database Configuration-----------------------
 mongoose.set('useNewUrlParser',true)
@@ -25,21 +25,14 @@ mongoose.connect(uri,{
 }).then(() => {
     console.log("successfully connected");
 }).catch((e) => {
-    console.log(e);
+    console.log(error);
 })
 
 
 //Connection Object can be used to fetch
-const db=mongoose.connection
-function getdata(username,callback){
-    const query = { StudentName: "check2", enroll: false };
-    console.log("ddd");
-    console.log(username);  
-    User.find(query,function(err, db){
-        if(err) console.log(err);
-        return callback(db)
-    })
-}
+let db=mongoose.connection
+
+
 //------------------------Nodejs Configuration-----------------------------
 let app=express()
 app.set("view engine","ejs")
@@ -57,13 +50,6 @@ app.use(passport.session())
 passport.use(new LocalStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
-
-
-app.use(express.urlencoded({ extended: true }));
-
-
-// Creating collection
-//inserting sample data in enroll collection
 
 
 //----------------------------Render------------------------------------
@@ -85,10 +71,11 @@ app.post("/register",function(req,res){
     let firstname=req.body.firstname
     let lastname=req.body.lastname
     let email=req.body.email
-    let date=req.body.dateofbirth
+    let date=req.body.date
     let username=req.body.username
     let password=req.body.password
     let status=req.body.status
+    console.log(status+" "+date)
     User.register(new User({
         firstname:firstname,
         lastname:lastname,
@@ -103,7 +90,7 @@ app.post("/register",function(req,res){
         }
         passport.authenticate("local")(
             req,res,function(){
-                res.render("secret")
+                res.render("login")
             })
         
     })
@@ -134,100 +121,49 @@ app.post("/login",passport.authenticate("local"),function(req,res){
     }) 
 })
 
-
-//courses enrolled
-app.get("/enrollCourses",function(req,res){
-     const username=req.user.username
-    getUserUnenrollCourses(username,function(coursesList){ 
-        var a=[];
-        coursesList.forEach(function(course, i){
-            a[i]=course.coursename;
-        })
-        console.log(a);
-        getUnerolledCourses(a,function(courses){
-            res.render('enrollCourses',{courses: courses});
-        }) 
-    });
-})
-
-
-app.get("/enrollStudents",function(req,res){
-    const username=req.user.username
-    getTeacherCourses(username,function(teacherCourses){
-                var courseNames=[];
-                teacherCourses.forEach(function(course, i){
-                courseNames[i]=course.CourseName;
-            })
-                var check=[false];      
-                getRequests(check,courseNames,function(coursess){
-                    var StudentNames=[];
-                    coursess.forEach(function(course, i){
-                    StudentNames[i]=course.username;
-                 })
-                    res.render('enrollStudents',{courses: coursess});   
-        });
-    })
-})
-   
-//Update Students enroll status (on accepting requests)
-app.post("/requests",isLoggedIn,function(req,res) {
-    var coursename = req.body.coursename;
-    var username = req.body.username;
-    console.log(username);
-    var userCollection = db.collection('enrollcourses');
-    userCollection.updateOne({username : username} , {$set: { enroll : true}})
-    .then(item => {
-      console.log("item saved to database");
-      res.redirect("/enrollStudents")
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  });
-
-
-//insert new course of student on enrolling in db
-app.post("/addname",isLoggedIn,function(req,res) {
-    var coursename = req.body.coursename;
-    var username = req.user.username;
-    console.log(username);
-    var userCollection = db.collection('enrollcourses');
-    userCollection.insertOne({ coursename:coursename,username:username,enroll:false})
-    .then(item => {
-      console.log("item saved to database");
-      res.redirect("/enrollCourses")
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  });
-
-app.get("/createCourse",function(req,res){
-    res.render("createCourse")
-})
-// Adding into database
-app.post("/createCourse",async (req,res) =>{
-    try {
-        const username=req.user.username;
-        const CourseName=req.body.Cname;
-        const Discription=req.body.discription;
-        const check1 = new Course({
-            username:username,
-            CourseName:CourseName,
-            Discription:Discription
-        })
-        const done = await check1.save();
-        res.status(400).render("secret");
-    } catch (error) {
-       console.log(error)
-    }
-})
-
-
-
 app.get("/logout",function(req,res){
     req.logout()
     res.redirect("/")
+})
+
+app.get("/createCourse",function(req,res){
+    res.render("createCourse", {"username" : req.user.username})
+})
+
+// Adding into database
+app.post("/createCourse",async (req,res) =>{
+    try {
+        const coursename=req.body.Cname;
+        const description=req.body.description;
+        const username=req.user.username;
+        const check1 = new Course({
+            username:username,
+            coursename:coursename,
+            description:description
+        })
+        const done = await check1.save();
+
+        //check whether user is student or teacher
+        getProfileData(username,function(profile){
+            if(profile[0].status == 'Teacher') {
+                //get teachers own courses
+                getTeacherCourses(username,function(courses){
+                    console.log("its a teacher");
+                    console.log(courses);
+                    res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+                }) 
+            }
+            else {
+                //get students enrolled courses
+                console.log("student");
+                getUserCourses(username,function(courses) {
+                    res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+                })
+            }
+        }) 
+    } catch (error) {
+       console.log(error)
+    }
 })
 
 function isLoggedIn(req,res,next){
@@ -243,18 +179,263 @@ function getUserName(callback){
         })
 }
 
+//--------------------SERVER----------------------
+let port=process.env.PORT || 3000
+app.listen(port, function(){
+    console.log("Server has started!")
+})
+
+//-----------------ADDED BY MAIRA----------------------
+
+
+var multer = require('multer');
+var path = require('path');
+var fs = require('fs');
+var docStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+     cb(null, 'uploads/docs');
+        },
+     filename: function (req, file, cb) {
+        var originalname = file.originalname;
+        var extension = originalname.split(".");
+        //filename= originalname;
+        filename = Date.now() + '.' + extension[extension.length-1]; 
+        cb(null, filename);
+      }
+    });
+
+
+app.get("/add-assignment",function(req,res){
+    res.render("add-assignment");
+ })
+
+
+// takes data from Add assignment form and adds object to database
+ app.post(
+   "/add-assignment",
+   multer({ storage: docStorage, dest: "uploads/docs" }).single("file"),
+   function (req, res) {
+     console.log(req.body);
+
+     var questions = [];
+     var filepath = "";
+
+     if ((req.body.type == "mcq")) {
+       for (let index = 0; index < req.body.mcqs; index++) {
+         var optionName = "option" + index;
+         var ques = {
+           text: req.body.question[index],
+           answer: req.body.answer[index],
+           marks: req.body.quesMarks[index],
+           options: req.body[optionName],
+         };
+         questions.push(ques);
+       }
+     } else if ((req.body.type == "doc")) {
+       filepath = req.file.path;
+     }
+     console.log("Questions object: " + questions);
+     try {
+       const assignment = new Assignment({
+         title: req.body.title,
+         description: req.body.desc,
+         dueDate: req.body.duedate,
+         totalMarks: req.body.marks,
+         grading: req.body.grading,
+         type: req.body.type,
+         filePath: filepath,
+         //courseID: {type:ObjectId,required:true,unique:false},
+         attemptedBy: [],
+         questions: questions,
+       });
+       const done = assignment.save();
+      
+       res.render("home");
+     } catch (err) {
+       console.log("Error POST add-assignment: " + err);
+     }
+   }
+ );
+
+
+ //-------------------END OF SECTION ADDED BY MAIRA----------------------------
+
+
+
+
+
+
+
+
+//----------------UMEHANI CODE------------------------------
+const moment = require('moment');
+
+app.get("/dashboard",function(req,res){
+    var username = req.user.username;
+    //check whether user is student or teacher
+    getProfileData(username,function(profile){
+        if(profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username,function(courses){
+                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+            }) 
+        }
+        else {
+            //get students enrolled courses
+            getUserCourses(username,function(courses) {
+                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            })
+        }
+    }) 
+})
+
+app.post("/dashboard",function(req,res){
+    var username = username;
+    //check whether user is student or teacher
+    getProfileData(username,function(profile){
+        if(profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username,function(courses){
+                console.log("its a teacher");
+                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+            }) 
+        }
+        else {
+            //get students enrolled courses
+            console.log("student");
+            getUserCourses(username,function(courses) {
+                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            })
+        }
+    }) 
+})
+
+//request to load profile page
+app.get("/profile",isLoggedIn,function(req,res){
+    console.log(req.user.username);
+    getProfileData(req.user.username, function(data){
+        res.render("profile", {"data" : data})
+    })
+})
+
+//updating profile
+app.post("/profile",isLoggedIn,function(req,res){
+    var username=req.body.username
+    var firstname=req.body.firstname
+    var lastname=req.body.lastname
+    var email=req.body.email
+    var date=req.body.date
+    var myquery = {username: username};
+    var newvalues = { $set: {firstname:firstname, lastname:lastname, email:email, date:date}};
+    User.updateOne(myquery,newvalues,function(err,user) {
+        if(err) throw err;
+        getProfileData(username,function(data){
+            data.date = moment(data.date).utc().format("YYYY-MM-DD")
+            console.log(data.date);
+            res.render("profile", {"data" : data}) 
+        })
+    })
+})
 
 //get userdata based on username
 function getProfileData(username,callback){
     const query = { username: username};
     User.find(query,function(err, db){
         if(err) console.log(err);
-       // console.log(db);
+        console.log(db);
         return callback(db)
     })        
 }
 
-// ------------ Maha's Functions-------------
+//get courses based on studentname
+function getUserCourses(username,callback){
+    const query = {username: username};
+    Enroll.find(query,function(err, db){
+        if(err) console.log(err);
+        return callback(db)
+    })        
+}
+
+//get courses based on teachername
+function getTeacherCourses(username,callback){
+    const query = {username: username};
+    Course.find(query,function(err, db){
+        if(err) console.log(err);
+        return callback(db)
+    })        
+}
+
+// ------------ Maha's Code-------------
+
+
+//courses enrolled
+app.get("/enrollCourses",function(req,res){
+    const username=req.user.username
+   getUserUnenrollCourses(username,function(coursesList){ 
+       var a=[];
+       coursesList.forEach(function(course, i){
+           a[i]=course.coursename;
+       })
+       console.log(a);
+       getUnerolledCourses(a,function(courses){
+           res.render('enrollCourses',{courses: courses});
+       }) 
+   });
+})
+
+
+app.get("/enrollStudents",function(req,res){
+   const username=req.user.username
+   getTeacherCourses(username,function(teacherCourses){
+               var courseNames=[];
+               teacherCourses.forEach(function(course, i){
+               courseNames[i]=course.coursename;
+           })
+               var check=[false];      
+               getRequests(check,courseNames,function(coursess){
+                   var StudentNames=[];
+                   coursess.forEach(function(course, i){
+                   StudentNames[i]=course.username;
+                })
+                   res.render('enrollStudents',{courses: coursess});   
+       });
+   })
+})
+  
+//Update Students enroll status (on accepting requests)
+app.post("/requests",isLoggedIn,function(req,res) {
+   var coursename = req.body.coursename;
+   var username = req.body.username;
+   console.log(username);
+   var userCollection = db.collection('enrollcourses');
+   userCollection.updateOne({username : username} , {$set: { enroll : true}})
+   .then(item => {
+     console.log("item saved to database");
+     res.redirect("/enrollStudents")
+   })
+   .catch(err => {
+     console.log(err);
+   });
+ });
+
+
+//insert new course of student on enrolling in db
+app.post("/addname",isLoggedIn,function(req,res) {
+   var coursename = req.body.coursename;
+   var username = req.user.username;
+   console.log(username);
+   var userCollection = db.collection('enrollcourses');
+   userCollection.insertOne({ coursename:coursename,username:username,enroll:false})
+   .then(item => {
+     console.log("item saved to database");
+     res.redirect("/enrollCourses")
+   })
+   .catch(err => {
+     console.log(err);
+   });
+ });
+
+
 //get students enrolled courses
 function getUserUnenrollCourses(username,callback){
     const query = {username: username};
@@ -267,7 +448,7 @@ function getUserUnenrollCourses(username,callback){
 
 // get student unenrolled courses
 function getUnerolledCourses(coursesList,callback){
-    Course.find({CourseName: {$nin : coursesList}},function(err, db){
+    Course.find({coursename: {$nin : coursesList}},function(err, db){
         if(err) console.log(err);
         return callback(db)
     })        
@@ -282,33 +463,15 @@ function getRequests(finall,names,callback){
 }
 
 //--------------end-------------------
-    
-
-//get courses based on teachername
-function getTeacherCourses(username,callback){
-    const query = {username: username};
-    Course.find(query,function(err, db){
-        if(err) console.log(err);
-        return callback(db)
-    })        
-}
 
 
-//get courses based on studentname
-function getUserCourses(username,callback){
-    const query = {username: username};
-    Enroll.find(query,function(err, db){
-        if(err) console.log(err);
-        return callback(db)
-    })        
-}
-//--------------------SERVER----------------------
-let port=process.env.PORT || 3000
-app.listen(port, function(){
-    console.log("Server has started!")
-})
+//get courses not for this user
+//function exploreCourses(callback){
+//  const query = {coursename:coursename}
+//Course.find(function(err,db){
+//  if (err) console.log(err);
+//  return callback(db);
+//   })
+//}
 
-
-
-
-
+  

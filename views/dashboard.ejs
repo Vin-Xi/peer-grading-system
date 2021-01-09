@@ -1,0 +1,103 @@
+<DOCTYPE HTML>
+    <html>
+    <head>
+        <title>Dashboard</title>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="../public/styles/styles.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row" style="padding-bottom:20px;">
+                <div class="col-md-8">
+                </div>
+                <div class="col-md-4">
+                    <h1></h1>
+                </div>
+            </div>
+            <div class="row" style="padding-bottom:50px;">
+                <div class="col-md-12">
+                    <h2 class="text-center" style="color:#1C6EA4">
+                        Welcome to your Dashboard!
+                    </h2>
+                </div>
+            </div>
+            <div class="row" style="padding-bottom:20px;">
+                <div class="col-md-3 btn-group btn-group-vertical btn-group-lg" role="group" style="padding:20px;border: 3px solid #1C6EA4;margin-top:20px;-webkit-box-shadow: 8px 13px 4px 0px rgba(0,0,0,0.17); 
+                box-shadow: 8px 13px 4px 0px rgba(0,0,0,0.17);">
+                    <div class="row">
+                        <div class="col-md-12"> 
+                            <form action="/profile" method="get">
+                                <button class="btn btn-lg button-primary">
+                                    Profile
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <% if(status == 'Teacher'){%>
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <form action="/createCourse" method="get">
+                                    <button class="btn btn-lg button-primary">
+                                        Add Course
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <%}%>
+                    <% if(status == 'Teacher'){%>
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <button class="btn btn-lg button-primary">
+                                    Enroll Students
+                                </button>
+                            </div>
+                        </div>
+                    <%}%>
+                    <% if(status == 'Student'){%>
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <button class="btn btn-lg button-primary">
+                                    Explore Courses
+                                </button>
+                            </div>
+                        </div>
+                    <%}%>
+                    <% if(status == 'Student'){%>
+                        <div class="row">
+                            <div class="col-md-12"> 
+                                <button class="btn btn-lg button-primary">
+                                    See Grades
+                                </button>
+                            </div>
+                        </div>
+                    <%}%>
+                </div>
+                <div class="col-md-8" style="padding-bottom:20px;padding:20px;">
+                    <div style="color:#1C6EA4;padding-bottom:20px;border: 3px solid #1C6EA4;padding:20px;-webkit-box-shadow: 8px 13px 4px 0px rgba(0,0,0,0.17); 
+                        box-shadow: 8px 13px 4px 0px rgba(0,0,0,0.17);"> 
+                        <h3 class="text-left" >
+                            Your Courses
+                        </h3>
+                        <hr>
+                        <% courses.forEach(function(course, i){%>
+                            <table class="" style="width:100%;">
+                                <tr>
+                                    <td>
+                                        <h3 style="color:Black"><%=course.coursename%></h3> 
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p style="color:Black">'<%=course.description%>'</p> 
+                                    </td>
+                                </tr>
+                            </table>
+                            <hr>
+                        <%})%>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
