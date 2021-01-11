@@ -11,7 +11,7 @@ var AssignmentSchema = new mongoose.Schema({
   grading: {type:String,required:true,unique:false},
   type: {type:String,required:true,unique:false},
   filePath: {type:String,required:false,unique:false},
-  courseID: {type:ObjectId,required:false,unique:false}, //PENDING--CHANGE TO TRUE
+  coursename: {type:String,required:true,unique:false}, //PENDING--CHANGE TO TRUE
   attemptedBy: [{type:ObjectId,required:false,unique:false}],
   questions: [
       {

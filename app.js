@@ -6,10 +6,10 @@ const express=require("express"),
     passportLocalMongoose=require("passport-local-mongoose"),
     User=require("./models/user")
     Course=require("./models/course")
-    Enroll=require("./models/enrollcourse")
+    Enroll=require("./models/enrollCourses")
     Assignment=require("./models/assignment")
-    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    //const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
     //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
     //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
@@ -108,17 +108,28 @@ app.post("/login",passport.authenticate("local"),function(req,res){
             //get teachers own courses
             getTeacherCourses(username,function(courses){
                 console.log("its a teacher");
-                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+                res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id, "courses": courses ,"username":profile[0].username})
             }) 
         }
         else {
             //get students enrolled courses
             console.log("student");
-            getUserCourses(username,function(courses) {
-                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            getUserCourses(username,function(coursesList) {
+                console.log("THE COURSELIST");
+                console.log(coursesList);
+                var a=[];
+                coursesList.forEach(function(course, i){
+                    a[i]=course.coursename;
+                })
+
+                getStudentCourseInfo(a,function(courses){
+                    console.log("THE COURSES");
+                    console.log(courses);
+                    res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id,"username":profile[0].username, "courses": courses})
+                })
             })
         }
-    }) 
+    })
 })
 
 app.get("/logout",function(req,res){
@@ -150,14 +161,25 @@ app.post("/createCourse",async (req,res) =>{
                 getTeacherCourses(username,function(courses){
                     console.log("its a teacher");
                     console.log(courses);
-                    res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+                    res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id, "courses": courses ,"username":profile[0].username})
                 }) 
             }
             else {
                 //get students enrolled courses
                 console.log("student");
-                getUserCourses(username,function(courses) {
-                    res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+                getUserCourses(username,function(coursesList) {
+                    console.log("THE COURSELIST");
+                    console.log(coursesList);
+                    var a=[];
+                    coursesList.forEach(function(course, i){
+                        a[i]=course.coursename;
+                    })
+    
+                    getStudentCourseInfo(a,function(courses){
+                        console.log("THE COURSES");
+                        console.log(courses);
+                        res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id,"username":profile[0].username, "courses": courses})
+                    })
                 })
             }
         }) 
@@ -206,17 +228,21 @@ var docStorage = multer.diskStorage({
 
 
 app.get("/add-assignment",function(req,res){
-    res.render("add-assignment");
+    console.log("I AM IN GET");
+    var http = require('http');
+    var url = require('url');
+    var q = url.parse(req.url, true).query;
+    var coursename = q.coursename;
+    console.log(coursename);
+    res.render("add-assignment", {"status": req.user.status ,"id": req.user.id, "username":req.user.username, "coursename":coursename})
  })
 
 
 // takes data from Add assignment form and adds object to database
- app.post(
-   "/add-assignment",
+ app.post("/add-assignment",
    multer({ storage: docStorage, dest: "uploads/docs" }).single("file"),
    function (req, res) {
-     console.log(req.body);
-
+     console.log(req.body.coursename);
      var questions = [];
      var filepath = "";
 
@@ -244,23 +270,256 @@ app.get("/add-assignment",function(req,res){
          grading: req.body.grading,
          type: req.body.type,
          filePath: filepath,
-         //courseID: {type:ObjectId,required:true,unique:false},
+         coursename: req.body.coursename,
          attemptedBy: [],
          questions: questions,
        });
        const done = assignment.save();
-      
-       res.render("home");
-     } catch (err) {
+    } catch (err) {
        console.log("Error POST add-assignment: " + err);
      }
+     finally{
+        getCourseAssignments(req.body.coursename,function(assignments){
+            res.render("coursePage", {"status": req.user.status ,"id": req.user.id, "assignments": assignments ,"username":req.user.username, "coursename": req.body.coursename})
+           })
+     }
+    
    }
  );
 
 
- //-------------------END OF SECTION ADDED BY MAIRA----------------------------
+ app.post("/view-assignment",function(req,res){
+    var id = req.body.id;
+     if(req.user.status == "teacher"){
+        
+        console.log(id);
+        res.redirect("/assignment-teacher?id=" + id);
+     }
+     else{
+        console.log(id);
+        res.redirect("/assignment-student?id=" + id);
+     }
+     
+ })
 
+ app.get("/assignment-student", function (req, res) {
+    // var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
+        //var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
+        var http = require('http');
+    var url = require('url');
+    var q = url.parse(req.url, true).query;
+    var id = q.id;
+     console.log(id);
 
+     try {
+         getAssignmentData(id, function (assignment) {
+             console.log("assignment received: " + assignment)
+             res.render("assignment-student", {
+                 data: assignment
+             });
+ 
+ 
+         })
+     } catch (error) {
+         console.log(error)
+     }
+ })
+ 
+ app.get("/assignment-student/:filename", function (req, res) {
+     console.log("downloading assignment for student")
+     const dir = __dirname + "/uploads/docs/"
+     const filename = req.params.filename
+     res.download(dir + filename)
+ 
+ 
+ })
+ 
+ app.post("/assignment-student", multer({
+     storage: docStorage,
+     dest: "uploads/docs"
+ }).single("file"), function (req, res) {
+ 
+ 
+     //Code to upload submission
+     if (req.body.reqType == 'upload') {
+         var fileName = req.file.filename;
+         var id = "5ff73386b8778b2108e03d41"; //PENDING DOC ASSIGNMENT
+         const filter = {
+             _id: id
+         }
+         var name = "moora"
+         var update = {
+             "$push": {
+                 attemptedBy: {
+                     student: "5ff727a49a622346e00cc377", //PENDING
+                     fileName: fileName,
+                     marked: false
+                 }
+ 
+             }
+         }
+ 
+         console.log("Upload file: " + fileName)
+         //update code to push elements in array
+         Assignment.updateOne(filter, update, function (
+             err,
+             result
+         ) {
+             if (err) {
+                 console.log("Error: " + err)
+             } else {
+                 console.log("Successfully inserted")
+             }
+         })
+     }
+     //MCQ Answers 
+     else if (req.body.reqType == 'mcq') {
+         var id = "5ff72840b5a3d13408f49f94"; //PENDING --mcq assignment id
+         var filter = {
+             _id: id
+         }
+ 
+         var answersArr //to be pushed into attemptedBy attribute of db
+         //var studentID=req.body.studentID; 
+         console.log("MCQs received!")
+         answersArr = JSON.parse(JSON.stringify(req.body)) //get rid of [Object: null prototype] error
+         delete answersArr.reqType;
+         console.log(answersArr)
+         var answers = new Array;
+         for (var key in answersArr) {
+             var value = answersArr[key];
+             var x = {
+                 question: key,
+                 answer: value
+             }
+             answers.push(x)
+         }
+         var update;
+         //calculate Marks
+         try {
+             getAssignmentData(id, function (assignment) {
+                 var marks = calculateMarks(answers, assignment);
+                 update = {
+                     // "$push":{
+                     attemptedBy: {
+                         student: "5ff727a49a622346e00cc377", //PENDING: REPLACE BY PASSED VALUE
+                         answers: answers,
+                         marked: true,
+                         marks: marks
+                     }
+                 }
+                 Assignment.updateOne(filter, update, function (
+                     err,
+                     result
+                 ) {
+                     if (err) {
+                         console.log("Error: " + err)
+                     } else {
+                         console.log("Successfully inserted")
+                     }
+                 })
+ 
+             })
+         } catch (err) {
+             console.log("err" + err)
+         }
+         console.log(answers)
+ 
+     }
+ 
+     res.render("home")
+ })
+ 
+ app.get("/assignment-teacher", function (req, res) {
+ 
+    var http = require('http');
+    var url = require('url');
+    var q = url.parse(req.url, true).query;
+    var id = q.id;
+     console.log(id);
+     //var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
+     //var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
+     var students = [{
+             "5ff727889a622346e00cc376": "Maira Tariq"
+         },
+         {
+             "5ff727a49a622346e00cc377": "Um E Hani"
+         }
+     ]
+     //PENDING: Get assignment using ID, loop through attemptedBy and get Names of students -- pass assignment and names 
+     try {
+         getAssignmentData(id, function (assignment) {
+             console.log("assignment received: " + assignment)
+             res.render("assignment-teacher", {
+                 "data": assignment,
+                 "students": students
+             });
+ 
+ 
+         })
+     } catch (error) {
+         console.log(error)
+     }
+ })
+ 
+ app.get("/assignment-teacher/:filename", function (req, res, next) {
+     console.log("HERE")
+     const dir = __dirname + "/uploads/docs/"
+     const filename = req.params.filename
+     res.download(dir + filename)
+ 
+ })
+ 
+ app.get("/mcq-answers/:attempt", function (req, res,next) {
+     const data= req.params.attempt;
+     console.log("getting mcq answers----->"+data)
+     
+ 
+ 
+ })
+ 
+ 
+ 
+ function calculateMarks(answers, assignment) {
+     var marks = 0;
+     console.log("Answers in function " + answers)
+     console.log("Answers len " + answers.length)
+ 
+     console.log("Assignment object: " + assignment[0].questions)
+ 
+     for (let i = 0; i < answers.length; i++) {
+         var quesID = answers[i].question;
+         //look for this id in assignment
+         for (var x = 0; x < assignment[0].questions.length; x++) {
+ 
+             if (assignment[0].questions[x]._id == quesID) {
+                 console.log("in if")
+                 //compare answers
+                 if (assignment[0].questions[x].answer == answers[i].answer) {
+                     marks = marks + assignment[0].questions[x].marks;
+                     console.log("Correct!" + marks)
+                 }
+             }
+         }
+ 
+     }
+ 
+     return marks;
+ }
+
+ //get assignment based on assignment ID 
+function getAssignmentData(id, callback) {
+    const query = {
+        _id: id
+    };
+    Assignment.find(query, function (err, db) {
+        if (err) console.log(err);
+        console.log(db);
+        return callback(db)
+    })
+}
+
+//-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
 
 
@@ -282,11 +541,37 @@ app.get("/dashboard",function(req,res){
         }
         else {
             //get students enrolled courses
-            getUserCourses(username,function(courses) {
-                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            console.log("student");
+            getUserCourses(username,function(coursesList) {
+                console.log("THE COURSELIST");
+                console.log(coursesList);
+                var a=[];
+                coursesList.forEach(function(course, i){
+                    a[i]=course.coursename;
+                })
+
+                getStudentCourseInfo(a,function(courses){
+                    console.log("THE COURSES");
+                    console.log(courses);
+                    res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+                })
             })
         }
     }) 
+})
+
+app.get("/coursePage",function(req,res){
+    var http = require('http');
+    var url = require('url');
+    var q = url.parse(req.url, true).query;
+    var course = q.coursename;
+    var status = req.user.status;
+    var username = req.user.username;
+    var id = req.user.id;
+    console.log(status);
+    getCourseAssignments(course,function(assignments){
+        res.render("coursePage", {"status": status ,"id": id, "assignments": assignments ,"username":username, "coursename": course}) 
+    })
 })
 
 app.post("/dashboard",function(req,res){
@@ -297,14 +582,25 @@ app.post("/dashboard",function(req,res){
             //get teachers own courses
             getTeacherCourses(username,function(courses){
                 console.log("its a teacher");
-                res.render("dashboard", {"status": profile[0].status , "courses": courses ,"username":profile[0].username})
+                res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id, "courses": courses ,"username":profile[0].username})
             }) 
         }
         else {
             //get students enrolled courses
             console.log("student");
-            getUserCourses(username,function(courses) {
-                res.render("dashboard", {"status": profile[0].status ,"username":profile[0].username, "courses": courses})
+            getUserCourses(username,function(coursesList) {
+                console.log("THE COURSELIST");
+                console.log(coursesList);
+                var a=[];
+                coursesList.forEach(function(course, i){
+                    a[i]=course.coursename;
+                })
+
+                getStudentCourseInfo(a,function(courses){
+                    console.log("THE COURSES");
+                    console.log(courses);
+                    res.render("dashboard", {"status": profile[0].status ,"id": profile[0]._id,"username":profile[0].username, "courses": courses})
+                })
             })
         }
     }) 
@@ -342,17 +638,15 @@ function getProfileData(username,callback){
     const query = { username: username};
     User.find(query,function(err, db){
         if(err) console.log(err);
-        console.log(db);
         return callback(db)
     })        
 }
 
 //get courses based on studentname
 function getUserCourses(username,callback){
-    const query = {username: username};
-    Enroll.find(query,function(err, db){
-        if(err) console.log(err);
-        return callback(db)
+    Enroll.find({ $and: [ { username: { $eq:username } }, { enroll: { $eq: true } } ] },function(err, db){        //get the list of students courses and whether they are enrolled
+        if(err) console.log(err);      
+        return callback(db);
     })        
 }
 
@@ -363,6 +657,24 @@ function getTeacherCourses(username,callback){
         if(err) console.log(err);
         return callback(db)
     })        
+}
+
+//get enrolled courses of students
+function getStudentCourseInfo(coursesList,callback){
+    console.log("LIST OF COURSES");
+    console.log(coursesList);
+    Course.find({coursename: {$in : coursesList}},function(err, db){
+        if(err) console.log(err);
+        return callback(db)
+    })  
+}
+
+//get assignments for a course
+function getCourseAssignments(coursename,callback){
+    Assignment.find({coursename:coursename},function(err,db){
+        if(err) console.log(err);
+        return callback(db);
+    })
 }
 
 // ------------ Maha's Code-------------
@@ -378,7 +690,7 @@ app.get("/enrollCourses",function(req,res){
        })
        console.log(a);
        getUnerolledCourses(a,function(courses){
-           res.render('enrollCourses',{courses: courses});
+           res.render('enrollCourses',{courses: courses, "username" : username});
        }) 
    });
 })
@@ -397,26 +709,23 @@ app.get("/enrollStudents",function(req,res){
                    coursess.forEach(function(course, i){
                    StudentNames[i]=course.username;
                 })
-                   res.render('enrollStudents',{courses: coursess});   
+                   res.render('enrollStudents',{courses: coursess, "username" : username});   
        });
    })
 })
   
 //Update Students enroll status (on accepting requests)
 app.post("/requests",isLoggedIn,function(req,res) {
-   var coursename = req.body.coursename;
-   var username = req.body.username;
-   console.log(username);
-   var userCollection = db.collection('enrollcourses');
-   userCollection.updateOne({username : username} , {$set: { enroll : true}})
-   .then(item => {
-     console.log("item saved to database");
-     res.redirect("/enrollStudents")
-   })
-   .catch(err => {
-     console.log(err);
-   });
- });
+    var username = req.body.username;
+    var coursename = req.body.coursename;
+    var userCollection = db.collection('enrollcourses');
+    const query= {$and: [ { username: username }, { coursename: coursename } ] };
+    const set=  {$set:{ enroll : true}};
+    userCollection.updateOne(query,set,function(err){
+        if(err) throw err;
+        res.redirect("/enrollStudents");
+    });
+ })
 
 
 //insert new course of student on enrolling in db
