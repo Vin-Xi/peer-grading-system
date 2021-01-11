@@ -181,7 +181,7 @@ h2{
                     <td>Student's name</td> <!--print student's name -->
                     <!--check if doc or mcq-->
                     <%if(data[0].type=='doc'){%>
-                    <td> <a href="http://localhost:3000/assignment-teacher/<%attempt.fileName%>">Download</a></td> <!--download assignment-->
+                    <td> <a href="http://localhost:3000/assignment-teacher/<%=attempt.fileName%>">Download</a></td> <!--download assignment-->
                     <%} %> 
                     <%if(data[0].type=='mcq'){%>
                     <td> <a href="http://localhost:3000/mcq-answers/<%attempt%>" target="_blank">View MCQs Answers</a></td> <!--link to mcq assignment-->

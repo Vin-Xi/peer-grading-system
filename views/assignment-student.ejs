@@ -60,7 +60,7 @@
                       <!-- var link= data[0].filePath.replace('\\','/') -->
                     %>
                 <h3>Assignment</h3>
-                <a href="http://localhost:3000/assignment-student/<%data[0].fileName%>">Download Assignment</a>
+                <a href="http://localhost:3000/assignment-student/<%=data[0].fileName%>">Download Assignment</a>
                 <!-- <form action="/assignment-student" method="POST">
                     <input type="hidden" name="reqType" value="download" />
                     <input type="hidden" name="filePath" value="<%=data[0].filePath%>" />
@@ -96,6 +96,7 @@
                     <!--ending outer foreach-->
                     </br>
                     <div class="text-center">
+                        <input name="id" value='<%=id%>'readonly hidden>
                         <button type="submit" class="btn btn-primary pull-left btn-lg">Submit</button>
                 </form>
                 <%}%>
@@ -107,6 +108,7 @@
                     <input type="hidden" name="reqType" value="upload" />
                     <label class="control-label col-sm-2" for="file">Upload Assignment</label>
                     <input type="file" class="form-control" name="file" id="uploadDoc">
+                    <input name="id" value='<%=id%>'readonly hidden>
                     <button type="submit" class="btn btn-primary  btn-sm pull-right">Upload</button>
                 </form>
                 <%}%>

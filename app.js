@@ -8,8 +8,8 @@ const express=require("express"),
     Course=require("./models/course")
     Enroll=require("./models/enrollCourses")
     Assignment=require("./models/assignment")
-    //const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
     //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
     //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
@@ -244,8 +244,8 @@ app.get("/add-assignment",function(req,res){
    function (req, res) {
      console.log(req.body.coursename);
      var questions = [];
-     var filepath = "";
-
+     var markingScheme;
+     var filename=""
      if ((req.body.type == "mcq")) {
        for (let index = 0; index < req.body.mcqs; index++) {
          var optionName = "option" + index;
@@ -258,7 +258,14 @@ app.get("/add-assignment",function(req,res){
          questions.push(ques);
        }
      } else if ((req.body.type == "doc")) {
-       filepath = req.file.path;
+        fileName = req.file.filename;
+        console.log("file name ----> " + fileName)
+        if (req.body.grading == 'peer') {
+            markingScheme = req.body.criteria;
+            console.log("crit: " + req.body.criteria)
+            console.log("marking: " + markingScheme)
+        }
+    
      }
      console.log("Questions object: " + questions);
      try {
@@ -269,10 +276,11 @@ app.get("/add-assignment",function(req,res){
          totalMarks: req.body.marks,
          grading: req.body.grading,
          type: req.body.type,
-         filePath: filepath,
+         fileName: filename,
          coursename: req.body.coursename,
          attemptedBy: [],
          questions: questions,
+         markingScheme:markingScheme
        });
        const done = assignment.save();
     } catch (err) {
@@ -290,7 +298,8 @@ app.get("/add-assignment",function(req,res){
 
  app.post("/view-assignment",function(req,res){
     var id = req.body.id;
-     if(req.user.status == "teacher"){
+    console.log(req.user.status)
+     if(req.user.status == "Teacher"){
         
         console.log(id);
         res.redirect("/assignment-teacher?id=" + id);
@@ -315,7 +324,8 @@ app.get("/add-assignment",function(req,res){
          getAssignmentData(id, function (assignment) {
              console.log("assignment received: " + assignment)
              res.render("assignment-student", {
-                 data: assignment
+                 data: assignment,
+                 id:id
              });
  
  
@@ -339,19 +349,23 @@ app.get("/add-assignment",function(req,res){
      dest: "uploads/docs"
  }).single("file"), function (req, res) {
  
- 
+    var assign_id=req.body.id
+    console.log(assign_id)
+    var user_id=req.user.id
+    
      //Code to upload submission
      if (req.body.reqType == 'upload') {
          var fileName = req.file.filename;
-         var id = "5ff73386b8778b2108e03d41"; //PENDING DOC ASSIGNMENT
+      
+       
          const filter = {
-             _id: id
+             _id: assign_id
          }
          var name = "moora"
          var update = {
              "$push": {
                  attemptedBy: {
-                     student: "5ff727a49a622346e00cc377", //PENDING
+                     student: user_id,
                      fileName: fileName,
                      marked: false
                  }
@@ -374,9 +388,9 @@ app.get("/add-assignment",function(req,res){
      }
      //MCQ Answers 
      else if (req.body.reqType == 'mcq') {
-         var id = "5ff72840b5a3d13408f49f94"; //PENDING --mcq assignment id
+       
          var filter = {
-             _id: id
+             _id: assign_id
          }
  
          var answersArr //to be pushed into attemptedBy attribute of db
@@ -384,6 +398,7 @@ app.get("/add-assignment",function(req,res){
          console.log("MCQs received!")
          answersArr = JSON.parse(JSON.stringify(req.body)) //get rid of [Object: null prototype] error
          delete answersArr.reqType;
+         delete answersArr.id;
          console.log(answersArr)
          var answers = new Array;
          for (var key in answersArr) {
@@ -397,12 +412,14 @@ app.get("/add-assignment",function(req,res){
          var update;
          //calculate Marks
          try {
-             getAssignmentData(id, function (assignment) {
+             console.log(assign_id)
+             getAssignmentData(assign_id, function (assignment) {
                  var marks = calculateMarks(answers, assignment);
+                 
                  update = {
                      // "$push":{
                      attemptedBy: {
-                         student: "5ff727a49a622346e00cc377", //PENDING: REPLACE BY PASSED VALUE
+                         student: user_id, //PENDING: REPLACE BY PASSED VALUE
                          answers: answers,
                          marked: true,
                          marks: marks
@@ -482,6 +499,7 @@ app.get("/add-assignment",function(req,res){
  
  function calculateMarks(answers, assignment) {
      var marks = 0;
+     console.log("Assignment"+assignment)
      console.log("Answers in function " + answers)
      console.log("Answers len " + answers.length)
  
