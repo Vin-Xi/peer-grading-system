@@ -132,9 +132,14 @@ app.post("/login",passport.authenticate("local"),function(req,res){
     })
 })
 
-app.get("/logout",function(req,res){
-    req.logout()
-    res.redirect("/")
+app.get("/logout", function(req,res){
+    // clear the remember me cookie when logging out
+ res.clearCookie('remember_me');
+ req.logout();
+
+    // redirect to homepage
+    res.redirect('/login');
+
 })
 
 app.get("/createCourse",function(req,res){
