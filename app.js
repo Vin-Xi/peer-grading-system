@@ -263,8 +263,8 @@ app.get("/add-assignment",function(req,res){
          questions.push(ques);
        }
      } else if ((req.body.type == "doc")) {
-        fileName = req.file.filename;
-        console.log("file name ----> " + fileName)
+        filename = req.file.filename;
+        console.log("file name ----> " + filename)
         if (req.body.grading == 'peer') {
             markingScheme = req.body.criteria;
             console.log("crit: " + req.body.criteria)
@@ -357,7 +357,7 @@ app.get("/add-assignment",function(req,res){
     var assign_id=req.body.id
     console.log(assign_id)
     var user_id=req.user.id
-    
+    console.log(user_id)
      //Code to upload submission
      if (req.body.reqType == 'upload') {
          var fileName = req.file.filename;
@@ -366,7 +366,7 @@ app.get("/add-assignment",function(req,res){
          const filter = {
              _id: assign_id
          }
-         var name = "moora"
+        
          var update = {
              "$push": {
                  attemptedBy: {
@@ -544,10 +544,73 @@ function getAssignmentData(id, callback) {
 
 //-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
+//------------------------HAMDAN CODE---------------------------------------
+app.get("/peer-grading",function(req,res){
+    let user_id=req.user.id
+    let url = require('url');
+    let q = url.parse(req.url, true).query;
+    let assign_id=q.id
+    getAssignmentData(assign_id,function(assignment){
+        res.render("peer-grading",{"data":assignment,"id":user_id})
+    })
+    
+})
+
+app.get("/peer-grading/:filename", function (req, res) {
+    console.log("downloading assignment for peer-gradig")
+    const dir = __dirname + "/uploads/docs/"
+    const filename = req.params.filename
+    res.download(dir + filename)
+})
+
+app.post("/peer-grading",function(req,res){
+    let grades=req.body.totalmarks
+    let assign_id=req.body.assign_id//Assignment_id
+    let student_id=req.body.student_id//Person who checked
+    var filter = {
+        _id: assign_id,
+        "attemptedBy.student":student_id
+    }
+    
+    let update = {
+        '$set':{
+            'attemptedBy.$.marked':true,
+            'attemptedBy.$.marks':grades,
+        }
+        
+    }
+    Assignment.updateOne(filter, update, function (
+        err,
+        result
+    ) {
+        if (err) {
+            console.log("Error: " + err)
+        } else {
+            console.log(result)
+            console.log("Successfully inserted")
+            getUserCourses(req.user.username,function(coursesList) {
+                console.log("THE COURSELIST");
+                console.log(coursesList);
+                var a=[];
+                coursesList.forEach(function(course, i){
+                    a[i]=course.coursename;
+                })
+
+                getStudentCourseInfo(a,function(courses){
+                    console.log("THE COURSES");
+                    console.log(courses);
+                    res.render("dashboard", {"status": req.user.status ,"id": req.user.id,"username":req.user.username, "courses": courses})
+                })
+            })
+           
+            
+        }
+    })
+
+})
 
 
-
-
+//-----------------END OF SECTION ADDED BY HAMDAN-------------------------
 
 //----------------UMEHANI CODE------------------------------
 const moment = require('moment');

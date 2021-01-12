@@ -57,8 +57,17 @@
                                         <input name="id" value='<%=assignment.id%>'readonly hidden>
                                         <p style="color:Black">DEADLINE: '<%=assignment.dueDate%>'</p>
                                         <hr>
-                                        <p style="color:Black">'TOTAL MARKS: <%=assignment.totalMarks%>'</p>
+                                        <p style="color:Black">'TOTAL MARKS: <%=assignment.totalMarks%></p>
                                     </form>
+                                    <%var count = assignment.attemptedBy.filter(function(s) { return s.student!=id && s.marked==false; }).length;%>
+                                    <%=count%>
+                                    <% if(assignment.grading=='peer' && assignment.attemptedBy.some(e=>e.student==id) && assignment.attemptedBy.some(e=>e.marked==false) && count>0){%>
+                                            <form action="/peer-grading" method="get">
+                                                <button type=submit style="color:Black"> Assignment available for peer-grading! </button>
+                                                <input  name="id" value='<%=assignment.id%>'readonly hidden>
+                                            </form>
+                                    <%}%>
+                                     
                                 </div>
                                 <%})%>
                             </div>
