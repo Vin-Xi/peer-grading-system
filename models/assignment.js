@@ -7,11 +7,11 @@ var AssignmentSchema = new mongoose.Schema({
   description: {type:String,required:false,unique:false},
   dueDate: {type:Date,required:true,unique:false},
   totalMarks: {type:Number,required:true,unique:false},
-  grading: {type:String,required:true,unique:false},
+  grading: {type:String,required:false,unique:false},
   type: {type:String,required:true,unique:false},
   fileName: {type:String,required:false,unique:false},
   markingScheme:[{type:String,required:false,unique:false}],
-  courseID: {type:ObjectId,required:false,unique:false}, //PENDING--CHANGE TO TRUE
+  coursename: {type:String,required:true,unique:false}, //PENDING--CHANGE TO TRUE
   attemptedBy: [{
     student:{type:ObjectId,required:false,unique:false},
     fileName:{type:String,required:false,unique:false},
@@ -21,6 +21,7 @@ var AssignmentSchema = new mongoose.Schema({
       question:{type:ObjectId,required:false,unique:false},
       answer:{type:String,required:true,unique:false},
     }],
+    report:{type:String,required:false,unique:false},
    // answers:[{type:Mixed,required:true,unique:false}]
   }],
   questions: [

@@ -5,10 +5,9 @@
   <title>Bootstrap Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script>
     $(document).ready(function () {
       
@@ -68,6 +67,8 @@
 
 
     });
+    
+   
   </script>
 </head>
 
@@ -119,7 +120,7 @@
         </div>
       </div>
 
-
+     
       <!--Total marks for assignment-->
       <div class="form-group">
         <label class="control-label col-sm-2">Total marks</label>
@@ -145,9 +146,7 @@
 
       </div>
         
-      <!--MCQs  generated dynamically-->
-     
-
+      <!--MCQs-->
       <!--Type of grading -- PEER or TEACHER-->
       <div class="form-group" >
         <label class="control-label col-sm-2" for="grading">Type of grading</label>
@@ -166,10 +165,13 @@
           </br>
 
       <!--Submit button-->
-          </br>
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary  btn-lg">Add assignment</button>
-      </div>
+      <button type="submit" class="btn btn-primary  btn-lg pull-right">Add assignment</button>
+
+      <!--hidden coursename to pass back-->
+      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
+    </form>
+    <form action="/coursePage" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right" style="margin-right:5px;">Back</button>
+      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
     </form>
   </div>
 

@@ -1,20 +1,28 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <div class="container">
     <h2>Add Course</h2>
-    <form action="/createCourse" method="POST">
+    <form action="/createCourse" class="was-validated" method="POST">
       <div class="form-group">
-        <label for="name">Course Name: </label>
-        <input type="text" class="form-control" id="cid" placeholder="Enter Course name" name="Cname">
+        <label for="uname">Course Name</label>
+        <input type="text" class="form-control" id="cid" placeholder="Enter Course name" name="Cname" required> 
+        <div class="valid-feedback">Valid.</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
       </div>
       <div class="form-group">
         <label for="desc">Course Description:</label>
-        <input type="text" class="form-control" id="pwd" placeholder="Enter Course Description" name="description">
-      </div>
-      <button class="btn btn-default">ADD</button>
+          <input type="text" class="form-control" id="pwd" placeholder="Enter Course Description" name="description" required>
+        <div class="valid-feedback">Valid.</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      <button type="submit" class="btn btn-primary">ADD</button></div>
+    </form>
+    <form action="/dashboard" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right">Back</button>
     </form>
     <form action="/dashboard" method="get"><button type="submit" class="btn btn-default">Back</button>
     </form>
   </div>
+
+  

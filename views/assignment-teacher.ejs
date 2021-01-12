@@ -167,6 +167,7 @@ h2{
             <th>Student</th>
             <th>Solution</th>
             <th>Marks</th>
+            <th>Update Marks</th>
           
         </tr>
         </thead>
@@ -174,25 +175,34 @@ h2{
             <!--SHOW DATA FROM ASSIGNMENT OBJECT-->
             <!--loop thru length of attempted by -->
             <%
-            console.log(data[0].attemptedBy)
+            console.log("ATTEMPTED BY: " +data[0].attemptedBy.length)
             var attempts= data[0].attemptedBy;
             attempts.forEach(function(attempt, i){%>
                 <tr>
                     <td>Student's name</td> <!--print student's name -->
                     <!--check if doc or mcq-->
                     <%if(data[0].type=='doc'){%>
-                    <td> <a href="http://localhost:3000/assignment-teacher/<%attempt.fileName%>">Download</a></td> <!--download assignment-->
+                    <td> <a href="http://localhost:3000/assignment-teacher/<%=attempt.fileName%>">Download</a></td> <!--download assignment-->
                     <%} %> 
                     <%if(data[0].type=='mcq'){%>
-                    <td> <a href="http://localhost:3000/mcq-answers/<%attempt%>" target="_blank">View MCQs Answers</a></td> <!--link to mcq assignment-->
+                    <td><form action="/mcq-answers" method="POST">
+                        <input name="assignID" value='<%=data[0].id%>'readonly hidden>
+                        <input name="attemptID" value='<%=attempt._id%>' readonly hidden>
+                        <button type="submit" class="btn btn-primary mt-2">View MCQs Response</button>
+                    </form></td> <!--link to mcq assignment-->
                     <%} %> 
-                    <%if(attempt.marked===true){%>
-                    <td><%=attempt.marks%></td> <!--marks if marked-->
-                    <%} %> 
+                    <form action="/assignment-teacher" method="POST">
+                    <%if(attempt.marked===true){%><!--marks if marked-->
+                        <td> <input type="text" name="totalmarks" class="form-control" 
+                      value="<%=attempt.marks%>" >   </td> <%} %> 
                     <%if(attempt.marked===false){%>
-                    <td>-</td> <!--input value if not marked-->
+                    <td><td> <input type="text" name="totalmarks" class="form-control" 
+                        placeholder="Enter marks">   </td></td> <!--input value if not marked-->
                     <%} %> 
-                   
+                    <input name=assign_id value='<%=data[0].id%>'readonly hidden>
+                    <input name=student_id value='<%=attempt.student%>'readonly hidden>
+                    <td>  <button type="submit" class="btn btn-primary mt-2">Update Marks</button></td>
+                </form>
                    
                 </tr>
                
