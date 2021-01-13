@@ -9,8 +9,8 @@ const express=require("express"),
     Enroll=require("./models/enrollCourses")
     Assignment=require("./models/assignment")
   //  const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
-    const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
+    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
     //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
 //-------------------------Database Configuration-----------------------
@@ -142,8 +142,8 @@ app.get("/logout", function(req,res){
 
 })
 
-app.get("/createCourse",function(req,res){
-    res.render("createCourse", {"username" : req.user.username})
+app.get("/createCourse",isLoggedIn,function(req,res){
+    res.render("createCourse", {"username" : req.user.username, "status": req.user.status})
 })
 
 // Adding into database
@@ -234,7 +234,7 @@ var docStorage = multer.diskStorage({
     });
 
 
-app.get("/add-assignment",function(req,res){
+app.get("/add-assignment",isLoggedIn,function(req,res){
     console.log("I AM IN GET");
     var http = require('http');
     var url = require('url');
@@ -303,7 +303,7 @@ app.get("/add-assignment",function(req,res){
  );
 
 
- app.post("/view-assignment",function(req,res){
+ app.post("/view-assignment",isLoggedIn,function(req,res){
     var id = req.body.id;
     console.log(req.user.status)
      if(req.user.status == "Teacher"){
@@ -318,7 +318,7 @@ app.get("/add-assignment",function(req,res){
      
  })
 
- app.get("/assignment-student", function (req, res) {
+ app.get("/assignment-student",isLoggedIn, function (req, res) {
     // var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
         //var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
         var http = require('http');
@@ -342,7 +342,7 @@ app.get("/add-assignment",function(req,res){
      }
  })
  
- app.get("/assignment-student/:filename", function (req, res) {
+ app.get("/assignment-student/:filename",isLoggedIn, function (req, res) {
      console.log("downloading assignment for student")
      const dir = __dirname + "/uploads/docs/"
      const filename = req.params.filename
@@ -351,7 +351,7 @@ app.get("/add-assignment",function(req,res){
  
  })
  
- app.post("/assignment-student", multer({
+ app.post("/assignment-student",isLoggedIn, multer({
      storage: docStorage,
      dest: "uploads/docs"
  }).single("file"), function (req, res) {
@@ -462,7 +462,7 @@ app.get("/add-assignment",function(req,res){
      
  })
  
- app.get("/assignment-teacher", function (req, res) {
+ app.get("/assignment-teacher",isLoggedIn, function (req, res) {
  
     var http = require('http');
     var url = require('url');
@@ -494,7 +494,7 @@ app.get("/add-assignment",function(req,res){
      }
  })
  
- app.get("/assignment-teacher/:filename", function (req, res, next) {
+ app.get("/assignment-teacher/:filename",isLoggedIn, function (req, res, next) {
      console.log("HERE")
      const dir = __dirname + "/uploads/docs/"
      const filename = req.params.filename
@@ -510,7 +510,7 @@ app.get("/add-assignment",function(req,res){
 
 })
 
- app.post("/mcq-answers", function (req, res,next) {
+ app.post("/mcq-answers",isLoggedIn, function (req, res,next) {
   console.log("getting attemptid----->"+req.body.attemptID)
    //  var attemptObj= JSON.parse(req.body.attempt)
      console.log("getting assignment id----->"+req.body.assignID)
@@ -547,7 +547,7 @@ app.get("/add-assignment",function(req,res){
  
  })
  
- app.post("/assignment-teacher",function(req,res){
+ app.post("/assignment-teacher",isLoggedIn,function(req,res){
     let grades=req.body.totalmarks
     let assign_id=req.body.assign_id//Assignment_id
     let student_id=req.body.student_id//Person who's assignment was checked by teacher
@@ -627,7 +627,7 @@ function getAssignmentData(id, callback) {
 //-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
 //------------------------HAMDAN CODE---------------------------------------
-app.get("/peer-grading",function(req,res){
+app.get("/peer-grading",isLoggedIn,function(req,res){
     let user_id=req.user.id
     let url = require('url');
     let q = url.parse(req.url, true).query;
@@ -638,14 +638,14 @@ app.get("/peer-grading",function(req,res){
     
 })
 
-app.get("/peer-grading/:filename", function (req, res) {
+app.get("/peer-grading/:filename",isLoggedIn, function (req, res) {
     console.log("downloading assignment for peer-gradig")
     const dir = __dirname + "/uploads/docs/"
     const filename = req.params.filename
     res.download(dir + filename)
 })
 
-app.post("/peer-grading",function(req,res){
+app.post("/peer-grading",isLoggedIn,function(req,res){
     let grades=req.body.totalmarks
     let assign_id=req.body.assign_id//Assignment_id
     let student_id=req.body.student_id//Person who checked
@@ -697,7 +697,7 @@ app.post("/peer-grading",function(req,res){
 //----------------UMEHANI CODE------------------------------
 const moment = require('moment');
 
-app.get("/dashboard",function(req,res){
+app.get("/dashboard",isLoggedIn,function(req,res){
     var username = req.user.username;
     //check whether user is student or teacher
     getProfileData(username,function(profile){
@@ -728,7 +728,7 @@ app.get("/dashboard",function(req,res){
     }) 
 })
 
-app.get("/coursePage",function(req,res){
+app.get("/coursePage",isLoggedIn,function(req,res){
     var http = require('http');
     var url = require('url');
     var q = url.parse(req.url, true).query;
@@ -742,7 +742,7 @@ app.get("/coursePage",function(req,res){
     })
 })
 
-app.post("/dashboard",function(req,res){
+app.post("/dashboard",isLoggedIn,function(req,res){
     var username = username;
     //check whether user is student or teacher
     getProfileData(username,function(profile){
@@ -778,7 +778,7 @@ app.post("/dashboard",function(req,res){
 app.get("/profile",isLoggedIn,function(req,res){
     console.log(req.user.username);
     getProfileData(req.user.username, function(data){
-        res.render("profile", {"data" : data})
+        res.render("profile", {"data" : data,"status": req.user.status, "username" : req.user.username})
     })
 })
 
@@ -796,7 +796,7 @@ app.post("/profile",isLoggedIn,function(req,res){
         getProfileData(username,function(data){
             data.date = moment(data.date).utc().format("YYYY-MM-DD")
             console.log(data.date);
-            res.render("profile", {"data" : data}) 
+            res.render("profile", {"data" : data ,"status": req.user.status, "username" : req.user.username}) 
         })
     })
 })
@@ -849,7 +849,7 @@ function getCourseAssignments(coursename,callback){
 
 
 //courses enrolled
-app.get("/enrollCourses",function(req,res){
+app.get("/enrollCourses",isLoggedIn,function(req,res){
     const username=req.user.username
    getUserUnenrollCourses(username,function(coursesList){ 
        var a=[];
@@ -858,13 +858,13 @@ app.get("/enrollCourses",function(req,res){
        })
        console.log(a);
        getUnerolledCourses(a,function(courses){
-           res.render('enrollCourses',{courses: courses, "username" : username});
+           res.render('enrollCourses',{courses: courses, "username" : username,"status": req.user.status});
        }) 
    });
 })
 
 
-app.get("/enrollStudents",function(req,res){
+app.get("/enrollStudents",isLoggedIn,function(req,res){
    const username=req.user.username
    getTeacherCourses(username,function(teacherCourses){
                var courseNames=[];
@@ -877,7 +877,7 @@ app.get("/enrollStudents",function(req,res){
                    coursess.forEach(function(course, i){
                    StudentNames[i]=course.username;
                 })
-                   res.render('enrollStudents',{courses: coursess, "username" : username});   
+                   res.render('enrollStudents',{courses: coursess, "username" : username,"status": req.user.status});   
        });
    })
 })
