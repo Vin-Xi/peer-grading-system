@@ -1,0 +1,219 @@
+<!--Teacher's view of assignment-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment</title>
+    <style>
+        *{
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+body{
+    font-family: Helvetica;
+    -webkit-font-smoothing: antialiased;
+    background: rgb(248, 248, 248);
+}
+h2{
+    text-align: center;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgb(29, 28, 28);
+    padding: 30px 0;
+}
+
+/* Table Styles */
+
+.table-wrapper{
+    margin: 10px 70px 70px;
+    box-shadow: 0px 35px 50px rgba( 0, 0, 0, 0.2 );
+}
+
+.fl-table {
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    white-space: nowrap;
+    background-color: white;
+}
+
+.fl-table td, .fl-table th {
+    text-align: center;
+    padding: 8px;
+}
+
+.fl-table td {
+    border-right: 1px solid #f8f8f8;
+    font-size: 12px;
+}
+
+.fl-table thead th {
+    color: #ffffff;
+    background: #4FC3A1;
+}
+
+
+.fl-table thead th:nth-child(odd) {
+    color: #ffffff;
+    background: #324960;
+}
+
+.fl-table tr:nth-child(even) {
+    background: #F8F8F8;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+    .fl-table {
+        display: block;
+        width: 100%;
+    }
+    .table-wrapper:before{
+        content: "Scroll horizontally >";
+        display: block;
+        text-align: right;
+        font-size: 11px;
+        color: white;
+        padding: 0 0 10px;
+    }
+    .fl-table thead, .fl-table tbody, .fl-table thead th {
+        display: block;
+    }
+    .fl-table thead th:last-child{
+        border-bottom: none;
+    }
+    .fl-table thead {
+        float: left;
+    }
+    .fl-table tbody {
+        width: auto;
+        position: relative;
+        overflow-x: auto;
+    }
+    .fl-table td, .fl-table th {
+        padding: 20px .625em .625em .625em;
+        height: 60px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 120px;
+        font-size: 13px;
+        text-overflow: ellipsis;
+    }
+    .fl-table thead th {
+        text-align: left;
+        border-bottom: 1px solid #f7f7f9;
+    }
+    .fl-table tbody tr {
+        display: table-cell;
+    }
+    .fl-table tbody tr:nth-child(odd) {
+        background: none;
+    }
+    .fl-table tr:nth-child(even) {
+        background: transparent;
+    }
+    .fl-table tr td:nth-child(odd) {
+        background: #F8F8F8;
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tr td:nth-child(even) {
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tbody td {
+        display: block;
+        text-align: center;
+    }
+}
+    </style>
+</head>
+<body>
+    <%
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var due=days[data[0].dueDate.getDay()]+", "+ data[0].dueDate.getDate()+" " + months[data[0].dueDate.getMonth()] +" "+ data[0].dueDate.getFullYear() ;
+       var type="";
+    if(data[0].grading=='peer'){
+       type="This is a peer-graded assignment."
+   }
+   else{
+       type="This assignment will be graded by teacher."
+   }%>
+
+   <h1><%=data[0].title%></h1>
+   <p><%=data[0].description%></p>
+
+   </br>
+   <h4>Due date: <%=due%></h4>
+   </br>
+   <h4>Total marks: <%=data[0].totalMarks%></h4>
+   </br>
+   <h5>Note: <%=type%></h5>
+   <hr>
+    <h2>All submissions</h2>
+<div class="table-wrapper">
+    <table class="fl-table">
+        <thead>
+        <tr>
+            <th>Student</th>
+            <th>Solution</th>
+            <th>Marks</th>
+            <th>Update Marks</th>
+          
+        </tr>
+        </thead>
+        <tbody>
+            <!--SHOW DATA FROM ASSIGNMENT OBJECT-->
+            <!--loop thru length of attempted by -->
+            <%
+            console.log("ATTEMPTED BY: " +data[0].attemptedBy.length)
+            var attempts= data[0].attemptedBy;
+            attempts.forEach(function(attempt, i){%>
+                <tr>
+                    <td>Student's name</td> <!--print student's name -->
+                    <!--check if doc or mcq-->
+                    <%if(data[0].type=='doc'){%>
+                    <td> <a href="http://localhost:3000/assignment-teacher/<%=attempt.fileName%>">Download</a></td> <!--download assignment-->
+                    <%} %> 
+                    <%if(data[0].type=='mcq'){%>
+                    <td><form action="/mcq-answers" method="POST">
+                        <input name="assignID" value='<%=data[0].id%>'readonly hidden>
+                        <input name="attemptID" value='<%=attempt._id%>' readonly hidden>
+                        <button type="submit" class="btn btn-primary mt-2">View MCQs Response</button>
+                    </form></td> <!--link to mcq assignment-->
+                    <%} %> 
+                    <form action="/assignment-teacher" method="POST">
+                    <%if(attempt.marked===true){%><!--marks if marked-->
+                        <td> <input type="text" name="totalmarks" class="form-control" 
+                      value="<%=attempt.marks%>" >   </td> <%} %> 
+                    <%if(attempt.marked===false){%>
+                    <td><td> <input type="text" name="totalmarks" class="form-control" 
+                        placeholder="Enter marks">   </td></td> <!--input value if not marked-->
+                    <%} %> 
+                    <input name=assign_id value='<%=data[0].id%>'readonly hidden>
+                    <input name=student_id value='<%=attempt.student%>'readonly hidden>
+                    <td>  <button type="submit" class="btn btn-primary mt-2">Update Marks</button></td>
+                </form>
+                   
+                </tr>
+               
+           <%}) %> 
+      
+        
+        <tbody>
+    </table>
+</div>
+<script>
+
+</script>
+</body>
+</html>

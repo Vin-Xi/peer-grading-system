@@ -1,0 +1,153 @@
+<html lang="en">
+
+<head>
+    <title>Assignment</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+        //CHECK TAB FOCUS ------- CHEATING PAKRNAY KAY LIYE HUEHUE
+        $(document).ready(function () {
+            localStorage.setItem("report", "");
+
+    // Retrieve
+            console.log(localStorage.getItem("lastname"));
+            $("#start-mcq").on("click", startMCQ);
+
+            function startMCQ() {
+                $("#mcq-form").css({
+                    "visibility": "visible"
+                });
+                document.addEventListener("visibilitychange", function () {
+                    var d = new Date();
+                    var current=document.getElementById('cheatingReport').value
+                    console.log("Value of this html element---> "+current)
+                    var x="Switched to other window at " + d.toLocaleTimeString() +"\n";
+                    var y="Returned at " + d.toLocaleTimeString() +"\n"
+                    document.hidden ? current=current+x :current=current+y;
+                    document.getElementById('cheatingReport').value=current;
+                });
+
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+
+    <!--Side panel-->
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-2 sidenav" style="background-color: brown;">
+                <p>Yahan kuch bhi aa sakta hai</p>
+            </div>
+
+            <!--ASSIGNMENT INFO PORTION-->
+            <%      
+     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+     var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+     var due=days[data[0].dueDate.getDay()]+", "+ data[0].dueDate.getDate()+" " + months[data[0].dueDate.getMonth()] +" "+ data[0].dueDate.getFullYear() ;
+        var type="";
+     if(data[0].grading=='peer'){
+        type="This is a peer-graded assignment."
+    }
+    else{
+        type="This assignment will be graded by teacher."
+    }%>
+            <div class="col-sm-8 text-left">
+                <h1><%=data[0].title%></h1>
+                <p><%=data[0].description%></p>
+
+                </br>
+                <h4>Due date: <%=due%></h4>
+                </br>
+                <h4>Total marks: <%=data[0].totalMarks%></h4>
+                </br>
+                <h5>Note: <%=type%></h5>
+                <hr>
+                <!--SOLVE ASSIGNMENT PORTION-->
+
+                <!--If DOC assignment-->
+                <% if(data[0].type=='doc')
+                { 
+                      <!-- var link= data[0].filePath.replace('\\','/') -->
+                    %>
+                <h3>Assignment</h3>
+                <a href="http://localhost:3000/assignment-student/<%=data[0].fileName%>">Download Assignment</a>
+                <!-- <form action="/assignment-student" method="POST">
+                    <input type="hidden" name="reqType" value="download" />
+                    <input type="hidden" name="filePath" value="<%=data[0].filePath%>" />
+                    <input type="hidden" name="fileName" value="<%=data[0].title%>" />
+                    <button>Download</button>
+                </form> -->
+                <!-- <h3>Download assignment here: <a href="uploads\docs\check.txt" download="sth.txt" >Download</a></h3> -->
+                <%}%>
+                   
+                   
+                    
+                    <!--If MCQ assignment-->
+                    <% if(data[0].type=='mcq') {%>
+
+                <p>
+                    As soon as you click on the buttom below, the questions will be visible to you.
+                    Do NOT attempt to cheat as any tab/window change will be detected and reported to teacher.
+                </p>
+                <p>Only click the start button when you are ready to attempt the assignment. </p>
+                <button id="start-mcq" type="button" class="btn pull-left btn-primary">Click to start MCQ
+                    Assignment</button>
+                </br>
+                <form id="mcq-form" action="/assignment-student" method="POST" enctype="multipart/form-data" style="visibility:hidden">
+                    <input type="hidden" name="reqType" value="mcq" />
+                    <h1>MCQs</h1>
+                    <%  var ques= data[0].questions;
+                        ques.forEach(function(question, i){
+                            question["options"].push( question["answer"]) 
+                            console.log("Ques: "+ question)%>
+                    <h4><%=i+1%>.
+                        <%=question["text"] %></h4>
+                    <!--Options  PENDING: Shuffle order-->
+                    <%question.options.forEach(function(option, x){
+                                    if(option!=""){ %>
+                    <input type="radio" name="<%=question._id%>" id="mcqOpt" value="<%=option%>"><%=option%>
+                    </br>
+                    <%}%>
+                   <%})%>
+                    <!--ending inner for each-->
+                    <%})%>
+                    <!--ending outer foreach-->
+                    </br>
+                    <div class="text-center">
+                        <input name="id" value='<%=id%>' readonly hidden>
+                        <input type="hidden" id="cheatingReport" name="report" value="" />
+                        <button type="submit" class="btn btn-primary pull-left btn-lg">Submit</button>
+                </form>
+                <%}%>
+                   
+                        <!--If DOC assignment-->
+                        <% if(data[0].type=='doc'){%>
+                <hr>
+                <form action="/assignment-student" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="reqType" value="upload" />
+                    <label class="control-label col-sm-2" for="file">Upload Assignment</label>
+                    <input type="file" class="form-control" name="file" id="uploadDoc">
+                    <input name="id" value='<%=id%>' readonly hidden>
+                    <button type="submit" class="btn btn-primary  btn-sm pull-right">Upload</button>
+                </form>
+                <%}%>
+            </div>
+            <div class="col-sm-2 sidenav">
+
+            </div>
+        </div>
+    </div>
+   
+    <!-- <footer class="container-fluid text-center">
+  <p>Footer Text</p>
+</footer> -->
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+    <title>Requests</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" 
+    crossorigin="anonymous">
+    <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" 
+    crossorigin="anonymous">
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var button = $("button");
+        button.on("click", function() {
+        button.data("text-original", button.text());
+        button.text(button.data("text-swap"));
+        });
+    </script>
+    <link rel="stylesheet" href="styles/styles.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="top">
+              <h2>Students Requests</h2>
+            </div>
+
+            <div class="row">
+
+              <% courses.forEach(function(user, i){%>
+
+                <form method="POST" action="/requests">
+
+                  <div class="shadow" style="background-color:mintcream;">
+
+                    <div class="col-md-12" >
+
+                        <div class="col-md-2 enrollImageDiv" >
+                            <img src="https://c8.alamy.com/comp/JPGNAA/pakistan-monument-islamabad-pakistan-JPGNAA.jpg" class="enrollImage col-md-10">
+                        </div>
+
+                      <div class="col-md-6" style="float: left">
+    
+                        <div class="col-md-12 enrollInputDivs">
+                          <label class="enrollLabel">Student ID: </label>
+                          <input type="text" name="userid" value='<%=user.id%>' class="enrollInput" readonly> 
+                        </div>
+    
+                        <div class="col-md-12 enrollInputDivs">
+                          <label class="enrollLabel" >Student Name: </label>
+                          <input type="text" name="username" value='<%=user.username%>' class="enrollInput" readonly>
+                        </div>
+
+                        <div class="col-md-12">
+                          <label class="enrollLabel" >Course Name:</label>
+                          <input type="text" name="coursename" value='<%=user.coursename%>' class="enrollInput" readonly>
+                        </div>
+    
+    
+                    </div>
+
+                  <div class="col-md-4 enrollDivs">  
+
+                    <div class="col-md-12 enrollButtons">
+                      <input id="enroll-button" type="submit" value="Accept">
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="clearfix"></div>
+
+                <hr />
+
+              </div></form>
+              <%})%>
+
+            </div>
+            <form action="/dashboard" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right">Back</button>
+            </form>
+          </div>
+    </body>
+
+   

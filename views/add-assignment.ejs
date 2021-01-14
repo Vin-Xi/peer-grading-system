@@ -31,7 +31,7 @@
     function generateMCQs(){
       var numOfMCQs= $('#numMCQs').val();
       
-      //---code for elements
+                        //---code for elements
      $("#mcqHeading").css({"visibility":"visible"});
  
       var quesTextInput= '<div class="form-group" id="mcq"><label class="control-label col-sm-2" for="question">Question:</label><div class="col-sm-8"><input type="text" class="form-control" id="ques" placeholder="Enter question" name="question"></div>';
@@ -50,8 +50,25 @@
         
       }
     }
+
+
+    //------------Generate checklist for peer grading-----------------
+    $("#peer-grading").on("click",showAddBtn);
+    function showAddBtn(){
+      $("#newRow").css({"visibility":"visible"});
     
+    }
+    $("#addRow").on("click",generateCheckList);
+    function generateCheckList(){
+      var point='<div class="form-group" ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
+      $("#addRow").after(point)
+
+    }
+
+
     });
+    
+   
   </script>
 </head>
 
@@ -103,17 +120,7 @@
         </div>
       </div>
 
-      <!--Type of grading -- PEER or TEACHER-->
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="grading">Type of grading</label>
-        <label class="radio-inline">
-          <input type="radio" name="grading" onclick="" value="peer">Peer Grading
-        </label>
-        <label class="radio-inline">
-          <input type="radio" name="grading" onclick="" value="teacher">Grading by Teacher
-        </label>
-      </div>
-
+     
       <!--Total marks for assignment-->
       <div class="form-group">
         <label class="control-label col-sm-2">Total marks</label>
@@ -140,10 +147,31 @@
       </div>
         
       <!--MCQs-->
-     
+      <!--Type of grading -- PEER or TEACHER-->
+      <div class="form-group" >
+        <label class="control-label col-sm-2" for="grading">Type of grading</label>
+        <label class="radio-inline">
+          <input type="radio" name="grading" onclick="" value="peer" id="peer-grading">Peer Grading
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="grading" onclick="" value="teacher">Grading by Teacher
+        </label>
+      </div>
+            <div  class="col-sm-2"></div>
+            <div id="newRow"style="visibility: hidden;" >
+              <button id="addRow" type="button" class="btn btn-sm btn-info">Add grading criteria</button>
+            </br></br>
+            </div>
+          </br>
 
       <!--Submit button-->
       <button type="submit" class="btn btn-primary  btn-lg pull-right">Add assignment</button>
+
+      <!--hidden coursename to pass back-->
+      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
+    </form>
+    <form action="/coursePage" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right" style="margin-right:5px;">Back</button>
+      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
     </form>
   </div>
 
