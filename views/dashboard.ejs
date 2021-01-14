@@ -11,15 +11,46 @@
                 <hr>
             </div>
         </div>
-        <div class="row" style="align-content:center;">
+        <div class="row">
+            <% i = 1; %>
             <% courses.forEach(function(course, i){%>
-            <div class="col-md-4 courseBlock">
-                <form action="/coursePage" method="get">
-                    <input type="submit" style="font-size:24px;border:none; background-color: #FFFFFF;" name="coursename" value='<%=course.coursename%>'readonly>
-                </form>
-                <hr>
-                <p style="color:Black"><%=course.description%></p>
-            </div>
+                <div class="col-xl-3 col-md-6" style="display:grid; text-align: center;">
+                    <%if (i % 3 == 0){%>
+                        <div class="card bg-primary text-white mb-4">
+                            <div class="card-footer flex align-items-center justify-content-between" style="flex-grow:1; flex-basis: 100%">
+                                <form action="/coursePage" method="get">
+                                    <input type="submit" style="width: 225px;white-space: normal;border:none;font-size:20px;background-color:inherit;" name="coursename" value='<%=course.coursename%>'readonly>
+                                </form>
+                            
+                                <hr>
+                                <p style="color:Black"><%=course.description%></p>
+                            </div>
+                        </div>
+                    <%} else if (i % 3 == 1){ %>
+                    <div class="card bg-warning text-white mb-4">
+                        <div class="card-footer flex align-items-center justify-content-between" style="flex-grow:1; flex-basis: 100%">
+                            <form action="/coursePage" method="get">
+                                <input type="submit" style="width: 225px;white-space: normal; border:none;font-size:20px;background-color:inherit;" name="coursename" value='<%=course.coursename%>'readonly>
+                            </form>
+                        
+                            <hr>
+                            <p style="color:Black"><%=course.description%></p>
+                        </div>
+                    </div>
+                    <%} else { %>
+                        <div class="card bg-success text-white mb-4">
+                            <div class="card-footer flex align-items-center justify-content-between" style="flex-grow:1; flex-basis: 100%">
+                                <form action="/coursePage" method="get">
+                                    <input type="submit" style="width: 225px;white-space: normal;border:none;font-size:20px;background-color:inherit;" name="coursename" value='<%=course.coursename%>'readonly>
+                                </form>
+                            
+                                <hr>
+                                <p style="color:Black"><%=course.description%></p>
+                            </div>
+                        </div>
+                        <%}%>
+                </div>
+                <% i +=1; %>
             <%})%>
         </div>
     </div>    
