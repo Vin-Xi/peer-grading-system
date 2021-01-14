@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <title>Bootstrap Example</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<%- include('header.ejs') %>
+<h1 class="mt-4">Add New Assignment</h1>  
+<hr>               
+<div class="row container" style="margin-top:40px">
   <script>
     $(document).ready(function () {
       
@@ -45,37 +39,24 @@
       for (let index = 0; index < numOfMCQs; index++) {
         var otherOptionInput=' <label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Other Option:</label><div class="col-sm-5"><input type="text" class="form-control opt1" id="opt1" placeholder="Other option" name="option'+index+'"></div>';
         $("#mcqNumInput").append(quesTextInput+lineBreak+correctOptionInput+lineBreak+otherOptionInput+lineBreak+otherOptionInput+lineBreak+otherOptionInput+lineBreak+mcqMarksInput+closeDiv);
-        $("#mcqNumInput").append(lineBreak)
-        
+        $("#mcqNumInput").append(lineBreak)  
         
       }
     }
-
-
     //------------Generate checklist for peer grading-----------------
     $("#peer-grading").on("click",showAddBtn);
     function showAddBtn(){
       $("#newRow").css({"visibility":"visible"});
-    
     }
     $("#addRow").on("click",generateCheckList);
-    function generateCheckList(){
-      var point='<div class="form-group" ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
-      $("#addRow").after(point)
+      function generateCheckList(){
+        var point='<div class="form-group" ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
+        $("#addRow").after(point)
 
-    }
-
-
+      }
     });
-    
-   
   </script>
-</head>
-
-<body>
-
   <div class="container">
-    <h2>Add new assignment</h2>
 
     <!--- FORM-->
     <form class="form-horizontal" action="/add-assignment" method="POST" enctype="multipart/form-data">
@@ -165,18 +146,10 @@
           </br>
 
       <!--Submit button-->
-      <button type="submit" class="btn btn-primary  btn-lg pull-right">Add assignment</button>
+      <button type="submit" class="btn btn-primary">Add assignment</button>
 
       <!--hidden coursename to pass back-->
       <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
     </form>
-    <form action="/coursePage" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right" style="margin-right:5px;">Back</button>
-      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
-    </form>
   </div>
-
-
-
-</body>
-
-</html>
+  <%- include('footer.ejs') %>
