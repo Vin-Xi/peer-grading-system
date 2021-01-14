@@ -175,11 +175,12 @@ h2{
             <!--SHOW DATA FROM ASSIGNMENT OBJECT-->
             <!--loop thru length of attempted by -->
             <%
-            console.log("ATTEMPTED BY: " +data[0].attemptedBy.length)
+          
+            console.log("ATTEMPTED BY: " +students)
             var attempts= data[0].attemptedBy;
             attempts.forEach(function(attempt, i){%>
                 <tr>
-                    <td>Student's name</td> <!--print student's name -->
+                    <td><%=students[i]%></td> <!--print student's name -->
                     <!--check if doc or mcq-->
                     <%if(data[0].type=='doc'){%>
                     <td> <a href="http://localhost:3000/assignment-teacher/<%=attempt.fileName%>">Download</a></td> <!--download assignment-->
