@@ -8,8 +8,8 @@ const express=require("express"),
     Course=require("./models/course")
     Enroll=require("./models/enrollCourses")
     Assignment=require("./models/assignment")
-  //  const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-    const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
+    const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority";    //Hani's db
     //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
     //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
@@ -392,7 +392,20 @@ app.get("/add-assignment",isLoggedIn,function(req,res){
                  console.log("Successfully inserted")
                   
             //NAVIGATE TO DASHBOARD
-            
+            getUserCourses(req.user.username,function(coursesList) {
+                console.log("THE COURSELIST");
+                console.log(coursesList);
+                var a=[];
+                coursesList.forEach(function(course, i){
+                    a[i]=course.coursename;
+                })
+
+                getStudentCourseInfo(a,function(courses){
+                    console.log("THE COURSES");
+                    console.log(courses);
+                    res.render("dashboard", {"status": req.user.status ,"id": req.user.id,"username":req.user.username, "courses": courses})
+                })
+            })
              }
          })
      }
