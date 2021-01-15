@@ -1,29 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCQs Report</title>
-</head>
-<body>
-
+<%- include('header.ejs') %>
     <%console.log("Attempt: "+ attempt)
     var answersInAttempt=attempt.answers
     console.log("AttemptedAns: "+ answersInAttempt)
     console.log("Questions: "+questions)%>
-  
-    <h1>MCQs Response</h1>
-    <!--print each question with correct option and corresponding answer by student-->
-  <% questions.forEach(function(question, i){
-      console.log("quesid: " +question["_id"])%>
-    <h3>Question <%=(i+1)%>:  <%=question.text%></h3>
-    <h4>Correct answer:  <%=question.answer%> </h4>
-    <% answersInAttempt.forEach(function(answer, i){ if(JSON.stringify(answer.question)==JSON.stringify(question["_id"])){%>
-        <h4>Answer marked:<%=answer.answer%> </h4>
-       <%}})}) %> 
+        <main>
+            <div class="container-fluid">
+                <h2 class="mt-4">
+                    MCQ Submission
+                    <hr>
+                </h2>
 
-       <!--print cheating report-->
-       <h3>Report</h3>
-  <p><%=attempt.report%></p>
-</body>
-</html>
+                <!--print each question with correct option and corresponding answer by student-->
+                <% questions.forEach(function(question, i){
+      console.log("quesid: " +question["_id"])%>
+                    <h5>Question
+                        <%=(i+1)%>:
+                            <%=question.text%>
+                    </h5>
+                    <h6>
+                        (Marks:
+                        <%=question.marks%>)
+                    </h6>
+                    <h6 style="color:  #28a745;">Correct answer:
+                        <%=question.answer%>
+                    </h6>
+                    <% answersInAttempt.forEach(function(answer, i){ if(JSON.stringify(answer.question)==JSON.stringify(question["_id"])){
+                      if(question.answer!=answer.answer) {%>
+                        <h6 style="color: #dc3545;">Answer marked:
+                            <%=answer.answer%>
+                        </h6>
+                        <%}else{%>
+                            <h6 style="color:  #28a745;">Answer marked:
+                                <%=answer.answer%>
+                            </h6>
+                            <%}%>
+                                </br>
+                                <%}})}) %>
+
+                                    <!--print cheating report-->
+                                    <h3>Report</h3>
+                                    <% var report=attempt.report.split(". ").join("<br>"); %>
+                                        <p>
+                                            <%-report%>
+                                        </p>
+            </div>
+        </main>
+        <%- include('footer.ejs') %>
