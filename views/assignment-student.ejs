@@ -61,15 +61,12 @@
                              %>
                     <h3>Assignment</h3>
                     <a href="http://localhost:3000/assignment-student/<%=data[0].fileName%>">Download Assignment</a>
-
                     <%}%>
 
 
 
                         <!--If MCQ assignment-->
                         <% if(data[0].type=='mcq') {%>
-
-
                             <!--IF ASSIGNMENT ATTEMPTED, DISABLE BUTTON-->
                             <% console.log("Student attempt -->"+studentAttempt)
                          if(studentAttempt==true){%>
@@ -91,80 +88,77 @@
                                         As soon as you click on the buttom below, the questions will be visible to you. Do NOT attempt to cheat as any tab/window change will be detected and reported to teacher.
                                     </p>
                                     <p>Only click the start button when you are ready to attempt the assignment. </p>
-
-                                    <button id="start-mcq" type="button" class="btn pull-left btn-primary">Click to start MCQ
+                                    <<<<<<< HEAD=======>>>>>>> 7f1b9089284b67cb287da6ee01d21eabfb0ac1e2
+                                        <button id="start-mcq" type="button" class="btn pull-left btn-primary">Click to start MCQ
                              Assignment</button>
-                                    </br>
-                                    <%}%>
-                                        <!--end of else-->
-                                        <form id="mcq-form" action="/assignment-student" method="POST" enctype="multipart/form-data" style="visibility:hidden">
-                                            <input type="hidden" name="reqType" value="mcq" />
-                                            <h3>Multiple Choice Questions:</h3>
-                                            </br>
-                                            <%  var ques= data[0].questions;
+                                        </br>
+                                        <%}%>
+                                            <!--end of else-->
+                                            <form id="mcq-form" action="/assignment-student" method="POST" enctype="multipart/form-data" style="visibility:hidden">
+                                                <input type="hidden" name="reqType" value="mcq" />
+                                                <h3>Multiple Choice Questions:</h3>
+                                                </br>
+                                                <%  var ques= data[0].questions;
                                  ques.forEach(function(question, i){
                                      question["options"].push( question["answer"]) 
                                      console.log("Ques: "+ question)%>
-                                                <h5>Question
-                                                    <%=i+1%>:
-                                                        <%=question["text"] %>
-                                                </h5>
-                                                <p>(Marks:
-                                                    <%=question.marks%>)
-                                                </p>
-                                                <!--Options: Sort to shuffle options-->
-                                                <%var questions=question.options;
+                                                    <h5>Question
+                                                        <%=i+1%>:
+                                                            <%=question["text"] %>
+                                                    </h5>
+                                                    <p>(Marks:
+                                                        <%=question.marks%>)
+                                                    </p>
+                                                    <!--Options: Sort to shuffle options-->
+                                                    <%var questions=question.options;
                                                 questions.sort()%>
-                                                    <%questions.forEach(function(option, x){
+                                                        <%questions.forEach(function(option, x){
                                              if(option!=""){ %>
-                                                        <input type="radio" name="<%=question._id%>" id="mcqOpt" value="<%=option%>">
-                                                        <%=option%>
-                                                            </br>
-
-
-                                                            <%}%>
-                                                                <%})%>
-                                                                    <!--ending inner for each-->
-                                                                    </br>
+                                                            <input type="radio" name="<%=question._id%>" id="mcqOpt" value="<%=option%>">
+                                                            <%=option%>
+                                                                </br>
+                                                                <%}%>
                                                                     <%})%>
-                                                                        <!--ending outer foreach-->
-
+                                                                        <!--ending inner for each-->
                                                                         </br>
-                                                                        <div class="text-center">
-                                                                            <input name="id" value='<%=id%>' readonly hidden>
-                                                                            <input type="hidden" id="cheatingReport" name="report" value="" />
-                                                                            <input type="hidden" name="courseName" value="<%=data[0].coursename%>" />
-                                                                            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-                                        </form>
+                                                                        <%})%>
+                                                                            <!--ending outer foreach-->
+                                                                            </br>
+                                                                            <div class="text-center">
+                                                                                <input name="id" value='<%=id%>' readonly hidden>
+                                                                                <input type="hidden" id="cheatingReport" name="report" value="" />
+                                                                                <input type="hidden" name="courseName" value="<%=data[0].coursename%>" />
+                                                                                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                                            </form>
+                                            <<<<<<< HEAD=======>>>>>>> 7f1b9089284b67cb287da6ee01d21eabfb0ac1e2
+                                                <%}%>
 
-                                        <%}%>
-
-                                            <!--If DOC assignment-->
-                                            <% if(data[0].type=='doc'){%>
-                                                <hr>
-                                                <!--IF ASSIGNMENT ATTEMPTED, DISABLE FORM-->
-                                                <% console.log("Student attempt -->"+studentAttempt)
+                                                    <!--If DOC assignment-->
+                                                    <% if(data[0].type=='doc'){%>
+                                                        <hr>
+                                                        <!--IF ASSIGNMENT ATTEMPTED, DISABLE FORM-->
+                                                        <% console.log("Student attempt -->"+studentAttempt)
                          if(studentAttempt==true){%>
-                                                    </br>
-                                                    <h5 style="color: #28a745;">You have already submitted the assignment!</h5>
-                                                    </br>
-                                                    <h6>Marks attained:
-                                                        <%=attemptedBy[index].marks%>
-                                                    </h6>
-                                                    <%}<!--end of if-->
-                         else{%>
-                                                        <form action="/assignment-student" method="POST" enctype="multipart/form-data" id="upload-assign">
-                                                            <input type="hidden" name="reqType" value="upload" />
-                                                            <label class="control-label" for="file">Upload Assignment</label>
-                                                            <input type="file" class="form-control" name="file" id="uploadDoc">
-                                                            <input name="id" value='<%=id%>' readonly hidden>
-                                                            <input type="hidden" name="courseName" value="<%=data[0].coursename%>" />
                                                             </br>
-                                                            <button type="submit" class="btn btn-primary  btn-sm pull-right">Upload</button>
-                                                        </form>
-                                                        <%}%>
-                                                            <%}%>
-                                                                </div>
+                                                            <h5 style="color: #28a745;">You have already submitted the assignment!</h5>
+                                                            </br>
+                                                            <h6>Marks attained:
+                                                                <%=attemptedBy[index].marks%>
+                                                            </h6>
+                                                            <%}<!--end of if-->
+                         else{%>
+                                                                <form action="/assignment-student" method="POST" enctype="multipart/form-data" id="upload-assign">
+                                                                    <input type="hidden" name="reqType" value="upload" />
+                                                                    <label class="control-label" for="file">Upload Assignment</label>
+                                                                    <input type="file" class="form-control" name="file" id="uploadDoc">
+                                                                    <input name="id" value='<%=id%>' readonly hidden>
+                                                                    <input type="hidden" name="courseName" value="<%=data[0].coursename%>" />
+                                                                    </br>
+                                                                    <button type="submit" class="btn btn-primary  btn-sm pull-right">Upload</button>
+                                                                </form>
+                                                                <%}%>
+                                                                    <%}%>
+                                                                        </div>
 
     </main>
 

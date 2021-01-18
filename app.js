@@ -57,16 +57,6 @@ app.get("/", function(req, res) {
     res.render("register")
 })
 
-app.get("/data", function(req, res) {
-    getUserName(function(data) {
-        res.render("data", { "data": data })
-    })
-})
-
-app.get("/secret", isLoggedIn, function(req, res) {
-    res.render("secret")
-})
-
 app.post("/register", function(req, res) {
     let firstname = req.body.firstname
     let lastname = req.body.lastname
@@ -286,6 +276,7 @@ app.post("/add-assignment",
                 type: req.body.type,
                 fileName: filename,
                 coursename: req.body.coursename,
+                addedBy: req.user.username,
                 attemptedBy: [],
                 questions: questions,
                 markingScheme: markingScheme
@@ -294,9 +285,7 @@ app.post("/add-assignment",
         } catch (err) {
             console.log("Error POST add-assignment: " + err);
         } finally {
-            getCourseAssignments(req.body.coursename, function(assignments) {
-                res.render("coursePage", { "status": req.user.status, "id": req.user.id, "assignments": assignments, "username": req.user.username, "coursename": req.body.coursename })
-            })
+            res.redirect("/coursePage" + "?coursename=" + req.body.coursename);
         }
 
     }
@@ -306,14 +295,21 @@ app.post("/add-assignment",
 app.post("/view-assignment", isLoggedIn, function(req, res) {
     var id = req.body.id;
     console.log(req.user.status)
-    if (req.user.status == "Teacher") {
+    var status = req.user.status
+    var username = req.user.username
+    var course = req.body.coursename
+    if (req.user.status === "Teacher") {
 
         console.log(id);
         res.redirect("/assignment-teacher?id=" + id);
-    } else {
-        console.log(id);
+
+    } else if (status === 'Student') {
         res.redirect("/assignment-student?id=" + id);
+
+
     }
+
+
 
 })
 
@@ -324,19 +320,39 @@ app.get("/assignment-student", isLoggedIn, function(req, res) {
     var url = require('url');
     var q = url.parse(req.url, true).query;
     var id = q.id;
+    var found = false;
     console.log(id);
     var studentID = req.user.id;
     try {
         getAssignmentData(id, function(assignment) {
-            console.log("assignment received: " + assignment)
-            res.render("assignment-student", {
-                data: assignment,
-                id: id,
-                student: studentID,
-                username: req.user.username,
-                status: req.user.status
-            });
+            getUserCourses(req.user.username, function(courses) {
 
+                console.log("coursessss-->" + courses)
+                for (let index = 0; index < courses.length; index++) {
+                    if (courses[index].coursename === assignment[0].coursename) {
+                        found = true;
+                        res.render("assignment-student", {
+                            data: assignment,
+                            id: id,
+                            student: studentID,
+                            username: req.user.username,
+                            status: req.user.status
+                        });
+                        break;
+                    }
+                }
+                console.log("found " + found)
+                if (found === false) {
+                    console.log(" not found")
+                        //show error
+                    res.render("access-denied", {
+                        "status": req.user.status,
+                        "username": req.user.username,
+                    })
+
+                }
+
+            })
 
         })
     } catch (error) {
@@ -487,33 +503,41 @@ app.get("/assignment-teacher", isLoggedIn, function(req, res) {
     try {
 
         getAssignmentData(id, function(assignment) {
-            console.log("assignment received: " + assignment)
-            if (assignment[0].attemptedBy.length == 0) {
-                renderNow(assignment, students, res, req);
-            } else {
+            if (assignment[0].addedBy == req.user.username) {
+                console.log("assignment received: " + assignment)
+                if (assignment[0].attemptedBy.length == 0) {
+                    renderNow(assignment, students, res, req);
+                } else {
 
 
-                assignment[0].attemptedBy.forEach(function(attempt, i) {
-                    var studentID = attempt.student;
-                    getUserData(studentID, function(student) {
-                        var name = student[0].firstname + " " + student[0].lastname;
-                        console.log("name-->" + name)
-                        students.push(name)
-                        if (students.length === assignment[0].attemptedBy.length) {
-                            renderNow(assignment, students, res, req);
+                    assignment[0].attemptedBy.forEach(function(attempt, i) {
+                        var studentID = attempt.student;
+                        getUserData(studentID, function(student) {
+                            var name = student[0].firstname + " " + student[0].lastname;
+                            console.log("name-->" + name)
+                            students.push(name)
+                            if (students.length === assignment[0].attemptedBy.length) {
+                                renderNow(assignment, students, res, req);
 
-                        }
+                            }
+                        })
+
                     })
+                }
 
+                // console.log("Students---->"+students)
+                // res.render("assignment-teacher", {
+                //     "data": assignment,
+                //     "students": students
+                // });
+            } else {
+                //show error
+                res.render("access-denied", {
+                    "status": req.user.status,
+                    "username": req.user.username,
                 })
+
             }
-
-            // console.log("Students---->"+students)
-            // res.render("assignment-teacher", {
-            //     "data": assignment,
-            //     "students": students
-            // });
-
 
         })
     } catch (error) {
@@ -779,19 +803,130 @@ app.get("/dashboard", isLoggedIn, function(req, res) {
     })
 })
 
+
+app.post("/dashboard", isLoggedIn, function(req, res) {
+    //delete course
+    console.log("Delete course --->" + req.body.coursename)
+    var coursename = req.body.coursename
+    deleteCourse(coursename)
+    var username = req.user.username;
+    getProfileData(username, function(profile) {
+        if (profile[0].status == 'Teacher') {
+            //get teachers own courses
+            getTeacherCourses(username, function(courses) {
+                res.render("dashboard", { "status": profile[0].status, "courses": courses, "username": profile[0].username })
+            })
+        }
+
+    })
+})
 app.get("/coursePage", isLoggedIn, function(req, res) {
     var http = require('http');
     var url = require('url');
     var q = url.parse(req.url, true).query;
     var course = q.coursename;
+    console.log("Course name -->" + course)
     var status = req.user.status;
     var username = req.user.username;
     var id = req.user.id;
     console.log(status);
+    console.log("course -->" + course)
+    var found = false;
+    getCourseAssignments(course, function(assignments) {
+        if (status === "Teacher") {
+
+            //check if teacher created the course
+            getTeacherCourses(username, function(courses) {
+
+                console.log("coursessss-->" + courses)
+                for (let index = 0; index < courses.length; index++) {
+                    if (courses[index].coursename === course) {
+                        found = true;
+                        res.render("coursePage", { "status": status, "id": id, "assignments": assignments, "username": username, "coursename": course })
+                        break;
+                    }
+                }
+                console.log("found " + found)
+                if (found === false) {
+                    console.log(" not found")
+                        //show error
+                    res.render("access-denied", {
+                        "status": status,
+                        "username": username,
+                    })
+
+                }
+
+            })
+        } else if (status === 'Student') {
+            //check if student enrolled
+            getUserCourses(username, function(courses) {
+
+                console.log("coursessss-->" + courses)
+                for (let index = 0; index < courses.length; index++) {
+                    if (courses[index].coursename === course) {
+                        found = true;
+                        res.render("coursePage", { "status": status, "id": id, "assignments": assignments, "username": username, "coursename": course })
+                        break;
+                    }
+                }
+                console.log("found " + found)
+                if (found === false) {
+                    console.log(" not found")
+                        //show error
+                    res.render("access-denied", {
+                        "status": status,
+                        "username": username,
+                    })
+
+                }
+
+            })
+
+        }
+    })
+})
+
+app.post("/coursePage", isLoggedIn, function(req, res) {
+    //delete assignment
+    console.log("Delete assignment --->" + req.body.id)
+    var assignID = req.body.id
+    var course = req.body.course;
+    deleteAssignment(assignID)
+    var username = req.user.username;
+    //finally render coursepage again
+    var status = req.user.status;
+    var username = req.user.username;
+    var id = req.user.id;
     getCourseAssignments(course, function(assignments) {
         res.render("coursePage", { "status": status, "id": id, "assignments": assignments, "username": username, "coursename": course })
     })
+
 })
+
+function deleteCourse(coursename, callback) {
+    const query = {
+        coursename: coursename
+    };
+    Course.deleteOne(query, function(err, results) {
+
+        console.log("Course deleted!")
+
+    });
+
+}
+
+function deleteAssignment(id, callback) {
+    const query = {
+        _id: id
+    };
+    Assignment.deleteOne(query, function(err, results) {
+
+        console.log("Assignment deleted!")
+
+    });
+
+}
 
 app.post("/dashboard", isLoggedIn, function(req, res) {
     var username = username;
@@ -850,6 +985,7 @@ app.post("/profile", isLoggedIn, function(req, res) {
         })
     })
 })
+
 
 //get userdata based on username
 function getProfileData(username, callback) {
@@ -991,12 +1127,19 @@ function getRequests(finall, names, callback) {
 
 //--------------end-------------------
 
+//FAQ page
+app.get("/FAQ", isLoggedIn, function(req, res) {
+    console.log(req.user.username);
+    getProfileData(req.user.username, function(data) {
+        res.render("FAQ", { "data": data, "status": req.user.status, "username": req.user.username })
+    })
+})
 
-//get courses not for this user
-//function exploreCourses(callback){
-//  const query = {coursename:coursename}
-//Course.find(function(err,db){
-//  if (err) console.log(err);
-//  return callback(db);
-//   })
-//}
+
+//about us page
+app.get("/aboutus", isLoggedIn, function(req, res) {
+    console.log(req.user.username);
+    getProfileData(req.user.username, function(data) {
+        res.render("aboutus", { "data": data, "status": req.user.status, "username": req.user.username })
+    })
+})

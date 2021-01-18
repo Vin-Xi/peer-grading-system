@@ -12,6 +12,7 @@ var AssignmentSchema = new mongoose.Schema({
     fileName: { type: String, required: false, unique: false },
     markingScheme: [{ type: String, required: false, unique: false }],
     coursename: { type: String, required: true, unique: false },
+    addedBy: { type: String, required: true, unique: false }, //teacher's username
     attemptedBy: [{
         student: { type: ObjectId, required: false, unique: false },
         fileName: { type: String, required: false, unique: false },

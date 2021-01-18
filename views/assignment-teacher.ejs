@@ -32,8 +32,6 @@
             <%=type%>
                 </h6>
                 <hr>
-
-
                 <div class="card mb-4 ">
                     <div class="card-header ">
                         <i class="fas fa-table mr-1 "></i> Submissions
@@ -46,6 +44,7 @@
                                         <th>Student</th>
                                         <th>Solution</th>
                                         <th>Marks</th>
+                                        <th>Add/Change Marks</th>
                                         <th>Update Marks</th>
                                     </tr>
                                 </thead>
@@ -81,12 +80,14 @@
                         <form action="/assignment-teacher" method="POST">
                             <%if(attempt.marked===true){%>
                                 <!--marks if marked-->
+                                <td>
+                                    <%=attempt.marks%>
+                                </td>
                                 <td> <input type="text" name="totalmarks" class="form-control" value="<%=attempt.marks%>"> </td>
                                 <%} %>
                                     <%if(attempt.marked===false){%>
-
+                                        <td> Unmarked </td>
                                         <td> <input type="text" name="totalmarks" class="form-control" placeholder="Enter marks"> </td>
-
                                         <!--input value if not marked-->
                                         <%} %>
                                             <input name=assign_id value='<%=data[0].id%>' readonly hidden>
@@ -135,15 +136,11 @@
                                 <h6 class="m-3" style="color: #4dad6a;">Correct answer:
                                     <%=question.answer%>
                                 </h6>
-
                                 <%question.options.forEach(function(option, x){
                          if(option!=""){ %>
                                     <h6 class="m-3" style="color: #7c7c7c;">Other option:
                                         <%=option%>
                                     </h6>
-
-
-
                                     <%}%>
                                         <%})%>
                                             <!--ending inner for each-->
@@ -155,6 +152,5 @@
                                                       <!-- var link= data[0].filePath.replace('\\','/') -->
                                                     %>
                                                     <a class="m-3 mb-4" href="http://localhost:3000/assignment-student/<%=data[0].fileName%>">Download Assignment</a>
-
                                                     <%}%>
                                                         <%- include('footer.ejs') %>

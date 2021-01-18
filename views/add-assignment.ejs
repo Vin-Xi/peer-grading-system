@@ -3,9 +3,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
-
             //------Handles what type of assignment is. Disables form fields accordingly to allow correct input only ------------
-
             $("#doc-type").on("click", toggleUploadDoc);
             $("#mcq-type").on("click", toggleUploadDoc);
 
@@ -13,36 +11,28 @@
                 console.log("Document selected! ");
                 var docDisabled = $('#uploadDoc').is(':disabled');
                 var mcqDisabled = $("#numMCQs").is(':disabled');
-
                 $('#uploadDoc').prop('disabled', !docDisabled);
                 $('#numMCQs').prop('disabled', !mcqDisabled);
                 $('#numMCQsBtn').prop('disabled', !mcqDisabled);
             }
-
             //--------Generates MCQs----------
             $("#numMCQsBtn").on("click", generateMCQs);
 
             function generateMCQs() {
                 var numOfMCQs = $('#numMCQs').val();
-
                 //---code for elements
                 $("#mcqHeading").css({
                     "visibility": "visible"
                 });
-
                 var quesTextInput = '<div class="form-group" id="mcq"><label class="control-label col-sm-2" for="question">Question:</label><div class="col-sm-8"><input type="text" class="form-control" id="ques" placeholder="Enter question" name="question"></div>';
                 var correctOptionInput = '<label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Correct answer:</label><div class="col-sm-5"><input type="text" class="form-control" id="option" placeholder="Correct answer" name="answer"></div>';
-
                 var mcqMarksInput = '  <label class="control-label col-sm-2" for="quesMarks">Marks:</label><div class="col-sm-1"> <input class="form-control" type="number" id="marks-input" name="quesMarks"</div>';
                 var closeDiv = "</div>";
                 var lineBreak = "<br/><br/>";
-
-
                 for (let index = 0; index < numOfMCQs; index++) {
                     var otherOptionInput = ' <label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Other Option:</label><div class="col-sm-5"><input type="text" class="form-control opt1" id="opt1" placeholder="Other option" name="option' + index + '"></div>';
                     $("#mcqNumInput").append(quesTextInput + correctOptionInput + otherOptionInput + otherOptionInput + otherOptionInput + mcqMarksInput + closeDiv);
                     $("#mcqNumInput").append("<hr style='border-top: 1px dashed #fd7e14;'>")
-
                 }
             }
             //------------Generate checklist for peer grading-----------------
@@ -58,7 +48,6 @@
             function generateCheckList() {
                 var point = '<br/><div class="form-group " ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
                 $("#addRow").after(point)
-
             }
         });
     </script>
