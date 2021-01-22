@@ -1,3 +1,4 @@
+
 const express = require("express"),
     mongoose = require("mongoose"),
     passport = require("passport"),
@@ -8,10 +9,11 @@ const express = require("express"),
 Course = require("./models/course")
 Enroll = require("./models/enrollCourses")
 Assignment = require("./models/assignment")
-    //  const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+      const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
     //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority"; //Hani's db
-const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
+//const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
 //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
+
 
 //-------------------------Database Configuration-----------------------
 mongoose.set('useNewUrlParser', true)
@@ -379,6 +381,7 @@ app.post("/assignment-student", isLoggedIn, multer({
     var course = req.body.courseName;
     console.log("coursename -->" + course)
     console.log(user_id)
+
         //Code to upload submission
     if (req.body.reqType == 'upload') {
         var fileName = req.file.filename;
@@ -446,6 +449,7 @@ app.post("/assignment-student", isLoggedIn, multer({
             answers.push(x)
         }
         var update;
+
         // calculate Marks
         try {
             console.log(assign_id)
