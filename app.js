@@ -1,16 +1,15 @@
-
-const express = require("express"),
-    mongoose = require("mongoose"),
-    passport = require("passport"),
-    bodyParser = require("body-parser"),
-    LocalStrategy = require("passport-local"),
-    passportLocalMongoose = require("passport-local-mongoose"),
-    User = require("./models/user")
-Course = require("./models/course")
-Enroll = require("./models/enrollCourses")
-Assignment = require("./models/assignment")
-      const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
-    //const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority"; //Hani's db
+const   express = require("express"),
+        mongoose = require("mongoose"),
+        passport = require("passport"),
+        bodyParser = require("body-parser"),
+        LocalStrategy = require("passport-local"),
+        passportLocalMongoose = require("passport-local-mongoose"),
+        User = require("./models/user")
+        Course = require("./models/course")
+        Enroll = require("./models/enrollCourses")
+        Assignment = require("./models/assignment")
+const uri = "mongodb+srv://project1:project1@cluster0.ilcak.mongodb.net/project?retryWrites=true&w=majority";
+//const uri = "mongodb+srv://hani:uhmi10149658@cluster0.4bvup.mongodb.net/<dbname>?retryWrites=true&w=majority"; //Hani's db
 //const uri = "mongodb+srv://user1:user123@cluster0.wm8lw.mongodb.net/peer-grading-system?retryWrites=true&w=majority"; //maira's db
 //const uri = " mongodb+srv://maha:maharana@cluster0.x89gb.mongodb.net/peerGrading?retryWrites=true&w=majority"; //Maha's db
 
@@ -55,10 +54,11 @@ passport.deserializeUser(User.deserializeUser())
 
 
 //----------------------------Render------------------------------------
+
+//---------------------REGISTER PAGE--------------------
 app.get("/", function(req, res) {
     res.render("register")
 })
-
 app.post("/register", function(req, res) {
     let firstname = req.body.firstname
     let lastname = req.body.lastname
@@ -91,6 +91,7 @@ app.post("/register", function(req, res) {
         })
 })
 
+//------------LOGIN PAGE--------------------
 app.get("/login", function(req, res) {
     res.render("login")
 })
@@ -109,16 +110,12 @@ app.post("/login", passport.authenticate("local"), function(req, res) {
             //get students enrolled courses
             console.log("student");
             getUserCourses(username, function(coursesList) {
-                console.log("THE COURSELIST");
-                console.log(coursesList);
                 var a = [];
                 coursesList.forEach(function(course, i) {
                     a[i] = course.coursename;
                 })
 
                 getStudentCourseInfo(a, function(courses) {
-                    console.log("THE COURSES");
-                    console.log(courses);
                     res.render("dashboard", { "status": profile[0].status, "id": profile[0]._id, "username": profile[0].username, "courses": courses })
                 })
             })
@@ -136,6 +133,7 @@ app.get("/logout", function(req, res) {
 
 })
 
+//--------------------CREATE COURSE PAGE--------------------
 app.get("/createCourse", isLoggedIn, function(req, res) {
     res.render("createCourse", { "username": req.user.username, "status": req.user.status })
 })
@@ -186,28 +184,13 @@ app.post("/createCourse", async(req, res) => {
     }
 })
 
+
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.redirect("/login")
 }
 
-//------------Example Function to fetch data --------------
-function getUserName(callback) {
-    User.find(function(err, db) {
-        if (err) console.log(err);
-        return callback(db)
-    })
-}
-
-//--------------------SERVER----------------------
-let port = process.env.PORT || 3000
-app.listen(port, function() {
-    console.log("Server has started!")
-})
-
 //-----------------ADDED BY MAIRA----------------------
-
-let alert = require('alert');
 
 
 var multer = require('multer');
@@ -226,7 +209,7 @@ var docStorage = multer.diskStorage({
     }
 });
 
-
+//---------------Add Assignment Page-----------------
 app.get("/add-assignment", isLoggedIn, function(req, res) {
     console.log("I AM IN GET");
     var http = require('http');
@@ -293,7 +276,7 @@ app.post("/add-assignment",
     }
 );
 
-
+//---------------------VIEW ASSIGNMENT PAGE------------------
 app.post("/view-assignment", isLoggedIn, function(req, res) {
     var id = req.body.id;
     console.log(req.user.status)
@@ -315,9 +298,8 @@ app.post("/view-assignment", isLoggedIn, function(req, res) {
 
 })
 
+//------------------STUDENT ASSIGNMENT---------------
 app.get("/assignment-student", isLoggedIn, function(req, res) {
-    // var id = "5ff73386b8778b2108e03d41"; //for doc assignment PENDING
-    //var id = "5ff72840b5a3d13408f49f94"; //for mcq assignment
     var http = require('http');
     var url = require('url');
     var q = url.parse(req.url, true).query;
@@ -429,7 +411,7 @@ app.post("/assignment-student", isLoggedIn, multer({
         }
 
         var answersArr //to be pushed into attemptedBy attribute of db
-            //var studentID=req.body.studentID; 
+          
         console.log("MCQs received!")
         answersArr = JSON.parse(JSON.stringify(req.body)) //get rid of [Object: null prototype] error
         var report = req.body.report
@@ -492,7 +474,7 @@ app.post("/assignment-student", isLoggedIn, multer({
 
 
 })
-
+//------------------ASSIGNMENT TEACHER----------------
 app.get("/assignment-teacher", isLoggedIn, function(req, res) {
 
     var http = require('http');
@@ -529,11 +511,7 @@ app.get("/assignment-teacher", isLoggedIn, function(req, res) {
                     })
                 }
 
-                // console.log("Students---->"+students)
-                // res.render("assignment-teacher", {
-                //     "data": assignment,
-                //     "students": students
-                // });
+            
             } else {
                 //show error
                 res.render("access-denied", {
@@ -578,7 +556,7 @@ app.get("/mcq-answers", function(req, res) {
 
 app.post("/mcq-answers", isLoggedIn, function(req, res, next) {
     console.log("getting attemptid----->" + req.body.attemptID)
-        //  var attemptObj= JSON.parse(req.body.attempt)
+
     console.log("getting assignment id----->" + req.body.assignID)
     var assignID = req.body.assignID;
     try {
@@ -608,10 +586,7 @@ app.post("/mcq-answers", isLoggedIn, function(req, res, next) {
         console.log("failed boo")
     }
 
-    //  res.render("mcq-answers", {
-    //     "attemptID": req.body.attempt,
-    //     "questions": req.body.questions
-    // });
+   
 
 })
 
@@ -674,9 +649,7 @@ function calculateMarks(answers, assignment) {
                 }
             }
         }
-
     }
-
     return marks;
 }
 
@@ -687,7 +660,6 @@ function getAssignmentData(id, callback) {
     };
     Assignment.find(query, function(err, db) {
         if (err) console.log(err);
-        console.log(db);
         return callback(db)
     })
 }
@@ -707,6 +679,8 @@ async function getUserData(id, callback) {
 //-------------------END OF SECTION ADDED BY MAIRA----------------------------
 
 //------------------------HAMDAN CODE---------------------------------------
+
+//---------------PEER-GRADING PAGE----------------------
 app.get("/peer-grading", isLoggedIn, function(req, res) {
     let user_id = req.user.id
     let url = require('url');
@@ -733,13 +707,11 @@ app.post("/peer-grading", isLoggedIn, function(req, res) {
         _id: assign_id,
         "attemptedBy.student": student_id
     }
-
     let update = {
         '$set': {
             'attemptedBy.$.marked': true,
             'attemptedBy.$.marks': grades,
         }
-
     }
     Assignment.updateOne(filter, update, function(
         err,
@@ -751,24 +723,17 @@ app.post("/peer-grading", isLoggedIn, function(req, res) {
             console.log(result)
             console.log("Successfully inserted")
             getUserCourses(req.user.username, function(coursesList) {
-                console.log("THE COURSELIST");
-                console.log(coursesList);
                 var a = [];
                 coursesList.forEach(function(course, i) {
                     a[i] = course.coursename;
                 })
 
                 getStudentCourseInfo(a, function(courses) {
-                    console.log("THE COURSES");
-                    console.log(courses);
                     res.render("dashboard", { "status": req.user.status, "id": req.user.id, "username": req.user.username, "courses": courses })
                 })
             })
-
-
         }
     })
-
 })
 
 
@@ -776,7 +741,7 @@ app.post("/peer-grading", isLoggedIn, function(req, res) {
 
 //----------------UMEHANI CODE------------------------------
 const moment = require('moment');
-
+//--------------------DASHBOARD----------------
 app.get("/dashboard", isLoggedIn, function(req, res) {
     var username = req.user.username;
     //check whether user is student or teacher
@@ -790,16 +755,14 @@ app.get("/dashboard", isLoggedIn, function(req, res) {
             //get students enrolled courses
             console.log("student");
             getUserCourses(username, function(coursesList) {
-                console.log("THE COURSELIST");
-                console.log(coursesList);
+               
                 var a = [];
                 coursesList.forEach(function(course, i) {
                     a[i] = course.coursename;
                 })
 
                 getStudentCourseInfo(a, function(courses) {
-                    console.log("THE COURSES");
-                    console.log(courses);
+                   
                     res.render("dashboard", { "status": profile[0].status, "username": profile[0].username, "courses": courses })
                 })
             })
@@ -824,6 +787,8 @@ app.post("/dashboard", isLoggedIn, function(req, res) {
 
     })
 })
+
+//------------COURSEPAGE-------------------
 app.get("/coursePage", isLoggedIn, function(req, res) {
     var http = require('http');
     var url = require('url');
@@ -842,7 +807,7 @@ app.get("/coursePage", isLoggedIn, function(req, res) {
             //check if teacher created the course
             getTeacherCourses(username, function(courses) {
 
-                console.log("coursessss-->" + courses)
+              
                 for (let index = 0; index < courses.length; index++) {
                     if (courses[index].coursename === course) {
                         found = true;
@@ -865,8 +830,6 @@ app.get("/coursePage", isLoggedIn, function(req, res) {
         } else if (status === 'Student') {
             //check if student enrolled
             getUserCourses(username, function(courses) {
-
-                console.log("coursessss-->" + courses)
                 for (let index = 0; index < courses.length; index++) {
                     if (courses[index].coursename === course) {
                         found = true;
@@ -946,16 +909,12 @@ app.post("/dashboard", isLoggedIn, function(req, res) {
             //get students enrolled courses
             console.log("student");
             getUserCourses(username, function(coursesList) {
-                console.log("THE COURSELIST");
-                console.log(coursesList);
                 var a = [];
                 coursesList.forEach(function(course, i) {
                     a[i] = course.coursename;
                 })
 
                 getStudentCourseInfo(a, function(courses) {
-                    console.log("THE COURSES");
-                    console.log(courses);
                     res.render("dashboard", { "status": profile[0].status, "id": profile[0]._id, "username": profile[0].username, "courses": courses })
                 })
             })
@@ -963,6 +922,7 @@ app.post("/dashboard", isLoggedIn, function(req, res) {
     })
 })
 
+//--------------PROFILE PAGE---------------------
 //request to load profile page
 app.get("/profile", isLoggedIn, function(req, res) {
     console.log(req.user.username);
@@ -1035,9 +995,9 @@ function getCourseAssignments(coursename, callback) {
     })
 }
 
-// ------------ Maha's Code-------------
+// --------------------Maha's Code-------------------------------
 
-
+//-------------------ENROLL COURSES PAGE-----------
 //courses enrolled
 app.get("/enrollCourses", isLoggedIn, function(req, res) {
     const username = req.user.username
@@ -1046,7 +1006,6 @@ app.get("/enrollCourses", isLoggedIn, function(req, res) {
         coursesList.forEach(function(course, i) {
             a[i] = course.coursename;
         })
-        console.log(a);
         getUnerolledCourses(a, function(courses) {
             res.render('enrollCourses', { courses: courses, "username": username, "status": req.user.status });
         })
@@ -1085,7 +1044,7 @@ app.post("/requests", isLoggedIn, function(req, res) {
     });
 })
 
-
+//-----------------ADD NAME PAGE-------------
 //insert new course of student on enrolling in db
 app.post("/addname", isLoggedIn, function(req, res) {
     var coursename = req.body.coursename;
@@ -1128,6 +1087,11 @@ function getRequests(finall, names, callback) {
         return callback(db);
     })
 }
+//--------------------SERVER----------------------
+let port = process.env.PORT || 3000
+app.listen(port, function() {
+    console.log("Server has started!")
+})
 
 //--------------end-------------------
 
