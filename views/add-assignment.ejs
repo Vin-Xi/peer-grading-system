@@ -1,182 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('header.ejs') %>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            //------Handles what type of assignment is. Disables form fields accordingly to allow correct input only ------------
+            $("#doc-type").on("click", toggleUploadDoc);
+            $("#mcq-type").on("click", toggleUploadDoc);
 
-<head>
-  <title>Bootstrap Example</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      
-      //------Handles what type of assignment is. Disables form fields accordingly to allow correct input only ------------
+            function toggleUploadDoc() {
+                console.log("Document selected! ");
+                var docDisabled = $('#uploadDoc').is(':disabled');
+                var mcqDisabled = $("#numMCQs").is(':disabled');
+                $('#uploadDoc').prop('disabled', !docDisabled);
+                $('#numMCQs').prop('disabled', !mcqDisabled);
+                $('#numMCQsBtn').prop('disabled', !mcqDisabled);
+            }
+            //--------Generates MCQs----------
+            $("#numMCQsBtn").on("click", generateMCQs);
 
-        $("#doc-type").on("click",toggleUploadDoc);
-        $("#mcq-type").on("click",toggleUploadDoc);
+            function generateMCQs() {
+                var numOfMCQs = $('#numMCQs').val();
+                //---code for elements
+                $("#mcqHeading").css({
+                    "visibility": "visible"
+                });
+                var quesTextInput = '<div class="form-group" id="mcq"><label class="control-label col-sm-2" for="question">Question:</label><div class="col-sm-8"><input type="text" class="form-control" id="ques" placeholder="Enter question" name="question"></div>';
+                var correctOptionInput = '<label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Correct answer:</label><div class="col-sm-5"><input type="text" class="form-control" id="option" placeholder="Correct answer" name="answer"></div>';
+                var mcqMarksInput = '  <label class="control-label col-sm-2" for="quesMarks">Marks:</label><div class="col-sm-1"> <input class="form-control" type="number" id="marks-input" name="quesMarks"</div>';
+                var closeDiv = "</div>";
+                var lineBreak = "<br/><br/>";
+                for (let index = 0; index < numOfMCQs; index++) {
+                    var otherOptionInput = ' <label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Other Option:</label><div class="col-sm-5"><input type="text" class="form-control opt1" id="opt1" placeholder="Other option" name="option' + index + '"></div>';
+                    $("#mcqNumInput").append(quesTextInput + correctOptionInput + otherOptionInput + otherOptionInput + otherOptionInput + mcqMarksInput + closeDiv);
+                    $("#mcqNumInput").append("<hr style='border-top: 1px dashed #fd7e14;'>")
+                }
+            }
+            //------------Generate checklist for peer grading-----------------
+            $("#peer-grading").on("click", showAddBtn);
 
-      function toggleUploadDoc() {
-      console.log("Document selected! ");
-      var docDisabled= $('#uploadDoc').is(':disabled');
-      var mcqDisabled=$("#numMCQs").is(':disabled');
-      
-      $('#uploadDoc').prop('disabled', !docDisabled);
-      $('#numMCQs').prop('disabled', !mcqDisabled);
-      $('#numMCQsBtn').prop('disabled', !mcqDisabled);
-    }
+            function showAddBtn() {
+                $("#newRow").css({
+                    "visibility": "visible"
+                });
+            }
+            $("#addRow").on("click", generateCheckList);
 
-    //--------Generates MCQs----------
-    $("#numMCQsBtn").on("click",generateMCQs);
-    function generateMCQs(){
-      var numOfMCQs= $('#numMCQs').val();
-      
-                        //---code for elements
-     $("#mcqHeading").css({"visibility":"visible"});
- 
-      var quesTextInput= '<div class="form-group" id="mcq"><label class="control-label col-sm-2" for="question">Question:</label><div class="col-sm-8"><input type="text" class="form-control" id="ques" placeholder="Enter question" name="question"></div>';
-      var correctOptionInput='<label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Correct answer:</label><div class="col-sm-5"><input type="text" class="form-control" id="option" placeholder="Correct answer" name="answer"></div>';
-    
-      var mcqMarksInput='  <label class="control-label col-sm-2" for="quesMarks">Marks:</label><div class="col-sm-1"> <input class="form-control" type="number" id="marks-input" name="quesMarks"</div>';
-      var closeDiv="</div>";
-      var lineBreak = "<br/><br/>";
+            function generateCheckList() {
+                var point = '<br/><div class="form-group " ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
+                $("#addRow").after(point)
+            }
+        });
+    </script>
 
+    <main>
+        <h2 class="mt-4">Add New Assignment</h2>
+        <hr>
+        <div class="row container" style="margin-top:40px">
 
-      for (let index = 0; index < numOfMCQs; index++) {
-        var otherOptionInput=' <label class="control-label col-sm-2" style="font-size: smaller; color: gray;">Other Option:</label><div class="col-sm-5"><input type="text" class="form-control opt1" id="opt1" placeholder="Other option" name="option'+index+'"></div>';
-        $("#mcqNumInput").append(quesTextInput+lineBreak+correctOptionInput+lineBreak+otherOptionInput+lineBreak+otherOptionInput+lineBreak+otherOptionInput+lineBreak+mcqMarksInput+closeDiv);
-        $("#mcqNumInput").append(lineBreak)
-        
-        
-      }
-    }
+            <div class="container">
 
+                <!--- FORM-->
+                <form class="form-horizontal" action="/add-assignment" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="title">Assignment Title:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="title" placeholder="Enter Title" name="title">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="description">Assignment Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" rows="5" id="description" name="desc"></textarea>
+                            <!-- <input type="text" class="form-control" id="description" placeholder="Enter Description" name="Description"> -->
+                        </div>
+                    </div>
 
-    //------------Generate checklist for peer grading-----------------
-    $("#peer-grading").on("click",showAddBtn);
-    function showAddBtn(){
-      $("#newRow").css({"visibility":"visible"});
-    
-    }
-    $("#addRow").on("click",generateCheckList);
-    function generateCheckList(){
-      var point='<div class="form-group" ><label class="control-label col-sm-2" for="criteria">Criteria: </label> <div class="col-sm-10"><input type="text" class="form-control" placeholder="Enter Criteria" name="criteria"></div></div>';
-      $("#addRow").after(point)
+                    <!--DUE DATE FOR ASSIGNMENT-->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="duedate">Due date</label>
+                        <div class="col-sm-3">
+                            <input type="date" class="form-control" name="duedate" min="2000-01-02">
+                        </div>
+                    </div>
 
-    }
-
-
-    });
-    
-   
-  </script>
-</head>
-
-<body>
-
-  <div class="container">
-    <h2>Add new assignment</h2>
-
-    <!--- FORM-->
-    <form class="form-horizontal" action="/add-assignment" method="POST" enctype="multipart/form-data">
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="title">Assignment Title:</label>
-        <div class="col-sm-10">
-          <input type="text" class="form-control" id="title" placeholder="Enter Title" name="title">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="description">Assignment Description</label>
-        <div class="col-sm-10">
-          <textarea class="form-control" rows="5" id="description" name="desc"></textarea>
-          <!-- <input type="text" class="form-control" id="description" placeholder="Enter Description" name="Description"> -->
-        </div>
-      </div>
-
-      <!--DUE DATE FOR ASSIGNMENT-->
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="duedate">Due date</label>
-        <div class="col-sm-2">
-          <input type="date" class="form-control" name="duedate" min="2000-01-02">
-        </div>
-      </div>
-
-      <!--Type of assignment -- DOC or ONLINE-->
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="type">Type of assignment</label>
-        <label class="radio-inline">
+                    <!--Type of assignment -- DOC or ONLINE-->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="type">Type of assignment:</label>
+                        <label class="radio-inline mr-3">
           <input type="radio" name="type" id="doc-type" checked value="doc">Document
         </label>
-        <label class="radio-inline">
+                        <label class="radio-inline">
           <input type="radio" name="type" id="mcq-type" value="mcq">MCQs
         </label>
-      </div>
+                    </div>
 
-      <!--Upload document-->
-      <div class="form-group">
-        <label class="control-label col-sm-2" for="file">Upload Assignment</label>
-        <div class="col-sm-3">
-          <input type="file" class="form-control" name="file" id="uploadDoc">
-        </div>
-      </div>
-
-     
-      <!--Total marks for assignment-->
-      <div class="form-group">
-        <label class="control-label col-sm-2">Total marks</label>
-        <div class="col-sm-3">
-          <input class="form-control" type="number" id="marks-input" name="marks">
-        </div>
-      </div>
+                    <!--Upload document-->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="file">Upload Assignment</label>
+                        <div class="col-sm-3">
+                            <input type="file" class="form-control" name="file" id="uploadDoc">
+                        </div>
+                    </div>
 
 
-      <!--Number of MCQS-->
-      <div class="form-group" id="mcqNumInput">
-        <label class="control-label col-sm-2">How many MCQs?</label>
-        <div class="col-sm-1">
-          <input class="form-control" type="number" id="numMCQs" name="mcqs" disabled>
-        </div>
-        <button type="button" class="btn btn-primary btn-sm" id="numMCQsBtn" disabled>Generate questions</button>
-        <br/><br/>
+                    <!--Total marks for assignment-->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Total marks</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="number" id="marks-input" name="marks">
+                        </div>
+                    </div>
 
-         <div class="form-group">
 
-        <h4 class="control-label col-sm-3" style="visibility:hidden" id="mcqHeading">Multiple Choice Questions:</h4> <br/>
-      </div>
+                    <!--Number of MCQS-->
+                    <div class="form-group" id="mcqNumInput">
+                        <label class="control-label col-sm-2">How many MCQs?</label>
+                        <div class="col-sm-4 form-row">
+                            <input class="col-sm-3 mr-3 " type="number" id="numMCQs" name="mcqs" disabled>
+                            <button type="button" class="btn btn-secondary btn-sm " id="numMCQsBtn" disabled>Generate questions</button>
+                        </div>
 
-      </div>
-        
-      <!--MCQs-->
-      <!--Type of grading -- PEER or TEACHER-->
-      <div class="form-group" >
-        <label class="control-label col-sm-2" for="grading">Type of grading</label>
-        <label class="radio-inline">
+                        <div class="form-group">
+
+                            <h5 class="control-label col-sm-5 mt-3 mb-3" style="visibility:hidden" id="mcqHeading">Multiple Choice Questions:</h5>
+                        </div>
+
+                    </div>
+
+                    <!--MCQs-->
+                    <!--Type of grading -- PEER or TEACHER-->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="grading">Type of grading:</label>
+                        <label class="radio-inline mr-3">
           <input type="radio" name="grading" onclick="" value="peer" id="peer-grading">Peer Grading
         </label>
-        <label class="radio-inline">
+                        <label class="radio-inline">
           <input type="radio" name="grading" onclick="" value="teacher">Grading by Teacher
         </label>
-      </div>
-            <div  class="col-sm-2"></div>
-            <div id="newRow"style="visibility: hidden;" >
-              <button id="addRow" type="button" class="btn btn-sm btn-info">Add grading criteria</button>
-            </br></br>
+                    </div>
+                    <div class="col-sm-2"></div>
+                    <div id="newRow" style="visibility: hidden;">
+                        <button id="addRow" type="button" class="btn btn-sm btn-secondary mb-3 ">Add grading criteria</button>
+
+                    </div>
+                    </br>
+
+                    <!--Submit button-->
+                    <button type="submit" class="btn btn-primary btn-lg pull-right">Add assignment</button>
+
+                    <!--hidden coursename to pass back-->
+                    <input type='text' name="coursename" value='<%=coursename%>' readonly hidden>
+                </form>
             </div>
-          </br>
-
-      <!--Submit button-->
-      <button type="submit" class="btn btn-primary  btn-lg pull-right">Add assignment</button>
-
-      <!--hidden coursename to pass back-->
-      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
-    </form>
-    <form action="/coursePage" method="get"><button type="submit" class="btn btn-primary  btn-lg pull-right" style="margin-right:5px;">Back</button>
-      <input type='text' name="coursename" value='<%=coursename%>'readonly hidden>
-    </form>
-  </div>
-
-
-
-</body>
-
-</html>
+    </main>
+    <%- include('footer.ejs') %>

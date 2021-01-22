@@ -1,0 +1,13 @@
+<%- include('header.ejs') %>
+    <hr>
+    <h1 style="text-align:center;">Sorry, you cannot access this page!</h1>
+    <%if(status==='Student'){%>
+
+        <h4 class="mt-5" style="text-align:center;">You need to enroll in this course to access this page.</h4>
+        <%}%>
+            <% if(status==='Teacher'){%>
+                <h4 class="mt-5" style="text-align:center;">You cannot access a course you have not created.</h4>
+
+                <hr>
+                <%}%>
+                    <%- include('footer.ejs') %>
